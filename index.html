@@ -12,6 +12,7 @@
     // visitors, and anyone without JS, get the page straight away.
     (function () {
       var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.documentElement.classList.add('js');
       if (!reduce) { document.documentElement.classList.add('loading'); }
     })();
   </script>
@@ -479,10 +480,40 @@
     .work__list { border-top: 1px solid var(--rule); }
 
     .row {
+      position: relative;
       display: block;
       border-bottom: 1px solid var(--rule);
       padding-block: clamp(1.25rem, 2.5vw, 2rem);
       transition: transform var(--t) var(--ease);
+    }
+    /* Gold hairline drawn left to right under the hovered row. */
+    .row::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 300ms var(--ease);
+    }
+    .row:hover::after,
+    .row:focus-visible::after { transform: scaleX(1); }
+
+    /* ------------------------------------------------------------------
+       Section entrance: one 12px rise and fade per section, fired once.
+       Only when JS is on and motion is allowed; otherwise fully visible.
+       ------------------------------------------------------------------ */
+    @media (prefers-reduced-motion: no-preference) {
+      html.js .reveal {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 700ms var(--ease), transform 700ms var(--ease);
+      }
+      html.js .reveal.is-in {
+        opacity: 1;
+        transform: none;
+      }
     }
     .row__main {
       display: grid;
@@ -831,7 +862,7 @@
     <!-- ============================================================
          Wordmark wall (static type; animation comes later)
          ============================================================ -->
-    <section class="wall" aria-label="Companies">
+    <section class="wall reveal" aria-label="Companies">
       <div class="wall__head wrap">
         <span class="label">Where the work happened</span>
         <span class="label">2023 to now</span>
@@ -855,7 +886,7 @@
     <!-- ============================================================
          Work list
          ============================================================ -->
-    <section class="work" id="work" aria-labelledby="work-title" style="scroll-margin-top: var(--header-h)">
+    <section class="work reveal" id="work" aria-labelledby="work-title" style="scroll-margin-top: var(--header-h)">
       <div class="section-head wrap">
         <h2 class="display" id="work-title">Work</h2>
         <span class="label">Four ways the same job shows up</span>
@@ -925,7 +956,7 @@
          ============================================================ -->
     <section aria-label="Case studies" style="margin-top: clamp(3rem, 8vw, 7rem)">
 
-      <article class="case wrap" id="case-1" aria-labelledby="case-1-title">
+      <article class="case wrap reveal" id="case-1" aria-labelledby="case-1-title">
         <span class="case__num label">Case 01</span>
         <h2 class="case__title display" id="case-1-title">The first ninety days of a customer relationship</h2>
         <div class="tags case__tags">
@@ -945,7 +976,7 @@
         </div>
       </article>
 
-      <article class="case wrap" id="case-2" aria-labelledby="case-2-title">
+      <article class="case wrap reveal" id="case-2" aria-labelledby="case-2-title">
         <span class="case__num label">Case 02</span>
         <h2 class="case__title display" id="case-2-title">Reading an account before it goes quiet</h2>
         <div class="tags case__tags">
@@ -965,7 +996,7 @@
         </div>
       </article>
 
-      <article class="case wrap" id="case-3" aria-labelledby="case-3-title">
+      <article class="case wrap reveal" id="case-3" aria-labelledby="case-3-title">
         <span class="case__num label">Case 03</span>
         <h2 class="case__title display" id="case-3-title">Making expertise scale past one person</h2>
         <div class="tags case__tags">
@@ -985,7 +1016,7 @@
         </div>
       </article>
 
-      <article class="case wrap" id="case-4" aria-labelledby="case-4-title">
+      <article class="case wrap reveal" id="case-4" aria-labelledby="case-4-title">
         <span class="case__num label">Case 04</span>
         <h2 class="case__title display" id="case-4-title">The relationship layer</h2>
         <div class="tags case__tags">
@@ -1010,7 +1041,7 @@
     <!-- ============================================================
          About panel
          ============================================================ -->
-    <section class="about" id="about" aria-labelledby="about-title">
+    <section class="about reveal" id="about" aria-labelledby="about-title">
       <div class="wrap">
         <span class="label" id="about-title">About</span>
         <p class="about__statement display">Solving a problem once proves you can. Making sure it stops arriving is <em>the actual job.</em> That is why I build the documentation, the knowledge base and the tooling before anyone asks for it.</p>
@@ -1051,7 +1082,7 @@
     <!-- ============================================================
          Contact
          ============================================================ -->
-    <section class="contact wrap" id="contact" aria-labelledby="contact-title">
+    <section class="contact wrap reveal" id="contact" aria-labelledby="contact-title">
       <span class="label">Contact</span>
       <h2 class="display" id="contact-title" style="margin-top:1.25rem">Currently in Bangalore. Say hi.</h2>
       <div class="contact__links">
@@ -1486,6 +1517,26 @@
         if (document.hidden) { rampPad(null, 0.3); }
         else { rampPad(PAD_DB, 1.5); }
       });
+
+      // ----------------------------------------------------------------
+      // Section entrance: each .reveal rises 12px and fades in the first
+      // time it enters the viewport, then is unobserved. Skipped entirely
+      // under prefers-reduced-motion (the CSS never hides it either).
+      // ----------------------------------------------------------------
+      (function () {
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var targets = document.querySelectorAll('.reveal');
+        function showAll() { Array.prototype.forEach.call(targets, function (el) { el.classList.add('is-in'); }); }
+        if (reduceMotion || !('IntersectionObserver' in window)) { showAll(); return; }
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) { return; }
+            entry.target.classList.add('is-in');
+            io.unobserve(entry.target);
+          });
+        }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
+        Array.prototype.forEach.call(targets, function (el) { io.observe(el); });
+      })();
 
       // Live local time for Asia/Kolkata, shown in the header.
       var clock = document.getElementById('clock');
