@@ -7,6 +7,16 @@
   <meta name="description" content="Rahul owns what happens after the signature: customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
   <meta name="theme-color" content="#0A0C18">
 
+  <script>
+    // Decide before first paint whether the loader runs. Reduced-motion
+    // visitors, and anyone without JS, get the page straight away.
+    // Placed ahead of the stylesheet so a slow font request cannot stall it.
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) { document.documentElement.classList.add('loading'); }
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -246,6 +256,73 @@
     .hero h1 em {
       font-style: italic;
       color: var(--gold);
+    }
+    /* Each word is wrapped so the headline can stagger in behind the loader. */
+    .hero__w { display: inline-block; }
+    .hero__w > span { display: inline-block; }
+    html.loading .hero__w > span {
+      opacity: 0;
+      transform: translateY(.5em);
+    }
+    html.revealed .hero__w > span {
+      animation: hero-in 900ms var(--ease) both;
+      animation-delay: calc(120ms + var(--i, 0) * 75ms);
+    }
+    @keyframes hero-in {
+      from { opacity: 0; transform: translateY(.5em); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ------------------------------------------------------------------
+       Loader (first paint only; skipped under prefers-reduced-motion)
+       ------------------------------------------------------------------ */
+    .loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--void);
+      color: var(--bone);
+      padding: var(--gutter);
+      padding-bottom: calc(var(--gutter) + env(safe-area-inset-bottom, 0px));
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: stretch;
+    }
+    html.loading .loader,
+    .loader.is-done { display: flex; }
+    .loader[hidden] { display: none !important; }
+    .loader.is-done {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 500ms var(--ease);
+    }
+    html.loading { overflow: hidden; }
+
+    .loader__count {
+      font-family: var(--mono);
+      font-weight: 300;
+      font-size: clamp(6rem, 24vw, 22rem);
+      line-height: .8;
+      letter-spacing: -.04em;
+      font-variant-numeric: tabular-nums;
+      align-self: flex-start;
+      margin-left: -.06em; /* optical alignment of the first digit with the rule */
+    }
+    .loader__rule {
+      position: relative;
+      height: 1px;
+      margin-top: clamp(1rem, 3vw, 2rem);
+      background: var(--rule);
+      overflow: hidden;
+    }
+    .loader__fill {
+      position: absolute;
+      inset: 0;
+      background: var(--bone);
+      transform: scaleX(0);
+      transform-origin: left center;
+      will-change: transform;
     }
 
     /* ------------------------------------------------------------------
@@ -608,6 +685,11 @@
 </head>
 
 <body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__count" id="loader-count">0</div>
+    <div class="loader__rule"><span class="loader__fill" id="loader-fill"></span></div>
+  </div>
+
   <a class="skip-link" href="#work">Skip to work</a>
 
   <!-- ============================================================
@@ -646,7 +728,7 @@
          Hero
          ============================================================ -->
     <section class="hero wrap" aria-label="Introduction">
-      <h1 class="display">I own what happens <em>after</em> the signature.</h1>
+      <h1 class="display"><span class="hero__w" style="--i:0"><span>I</span></span> <span class="hero__w" style="--i:1"><span>own</span></span> <span class="hero__w" style="--i:2"><span>what</span></span> <span class="hero__w" style="--i:3"><span>happens</span></span> <span class="hero__w" style="--i:4"><span><em>after</em></span></span> <span class="hero__w" style="--i:5"><span>the</span></span> <span class="hero__w" style="--i:6"><span>signature.</span></span></h1>
     </section>
 
     <!-- ============================================================
@@ -891,6 +973,87 @@
 
   <script>
     (function () {
+      // ----------------------------------------------------------------
+      // Loader: counts 0 to 100 against real asset loading (the fonts
+      // stylesheet, document.fonts.ready, then the window load event),
+      // never finishing before 900ms so it does not flash.
+      // ----------------------------------------------------------------
+      var root = document.documentElement;
+      var loader = document.getElementById('loader');
+      var loaderHasRun = false; // first paint only; anchor and bfcache navigation must not re-run it
+
+      function finishLoader() {
+        loader.classList.add('is-done');          // 500ms opacity fade (CSS)
+        root.classList.remove('loading');
+        root.classList.add('revealed');           // hero words stagger in behind the fade
+        window.setTimeout(function () { loader.hidden = true; }, 520);
+      }
+
+      function runLoader() {
+        if (loaderHasRun) { return; }
+        loaderHasRun = true;
+
+        // The head script only adds .loading when motion is allowed and JS is on.
+        if (!root.classList.contains('loading')) { loader.hidden = true; return; }
+
+        var count = document.getElementById('loader-count');
+        var fill = document.getElementById('loader-fill');
+        var MIN_MS = 900;      // floor: the counter cannot reach 100 before this
+        var SPEED = 260;       // max units per second when assets are ahead of the counter
+        var STALL_MS = 12000;  // safety net for a hung request; only fires if load never does
+        var start = performance.now();
+        var last = start;
+        var shown = 0;
+        var target = 5;        // markup parsed and script running
+        var loaded = false;
+
+        function raise(n) { if (n > target) { target = n; } }
+
+        // Milestone 1: the Google Fonts stylesheet has arrived.
+        var fontsLink = document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]');
+        if (!fontsLink || fontsLink.sheet) {
+          raise(35);
+        } else {
+          fontsLink.addEventListener('load', function () { raise(35); });
+          fontsLink.addEventListener('error', function () { raise(35); });
+        }
+
+        // Milestone 2: every font face that is in use has loaded (or failed).
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () { raise(80); });
+        } else {
+          raise(80);
+        }
+
+        // Milestone 3: the window load event, every subresource accounted for.
+        function onLoaded() { loaded = true; raise(100); }
+        if (document.readyState === 'complete') { onLoaded(); }
+        else { window.addEventListener('load', onLoaded); }
+
+        var stallTimer = window.setTimeout(onLoaded, STALL_MS);
+
+        function frame(now) {
+          var dt = Math.min((now - last) / 1000, 0.1);
+          last = now;
+          var cap = 100 * (now - start) / MIN_MS;             // time floor
+          var next = Math.min(target, cap, shown + SPEED * dt); // real progress, rate-limited
+          if (next > shown) { shown = next; }
+          count.textContent = String(Math.floor(shown));
+          fill.style.transform = 'scaleX(' + (shown / 100) + ')';
+          if (shown >= 100 && loaded) {
+            window.clearTimeout(stallTimer);
+            finishLoader();
+            return;
+          }
+          window.requestAnimationFrame(frame);
+        }
+        window.requestAnimationFrame(frame);
+      }
+
+      runLoader();
+      // Restored from the back-forward cache: JS state survives, so the flag holds.
+      window.addEventListener('pageshow', function (e) { if (e.persisted) { runLoader(); } });
+
       // Live local time for Asia/Kolkata, shown in the header.
       var clock = document.getElementById('clock');
       var fmt = new Intl.DateTimeFormat('en-GB', {
