@@ -392,9 +392,10 @@
        ------------------------------------------------------------------ */
     .wall {
       overflow: hidden;
+      background: var(--panel);
       border-top: 1px solid var(--rule);
       border-bottom: 1px solid var(--rule);
-      padding-block: clamp(1rem, 3vw, 2.5rem);
+      padding-block: clamp(1.5rem, 4vw, 3.5rem);
     }
     .wall__head {
       display: flex;
@@ -402,33 +403,59 @@
       gap: 1rem;
       margin-bottom: clamp(1rem, 3vw, 2.5rem);
     }
-    .wall__list { display: block; }
+    .wall__list { display: block; border-top: 1px solid var(--rule); }
     .wall__item {
-      font-size: clamp(2.4rem, 8.4vw, 9.5rem);
-      white-space: nowrap;
-      line-height: 1.05;
-      padding-block: .05em;
-      border-top: 1px solid var(--rule);
+      position: relative;
       display: flex;
       align-items: baseline;
-      gap: .35em;
+      justify-content: space-between;
+      gap: 1.5rem;
       min-width: 0;
+      padding-block: .12em;
+      border-bottom: 1px solid var(--rule);
+      font-size: clamp(2.4rem, 7vw, 8.5rem);
+      line-height: 1.05;
+      white-space: nowrap;
     }
-    .wall__item:first-child { border-top: 0; }
-    .wall__item:nth-child(2) { justify-content: flex-end; }
-    .wall__item:nth-child(3) { justify-content: center; }
-    .wall__index {
-      font-family: var(--mono);
-      font-size: .72rem;
-      letter-spacing: .12em;
-      color: var(--bone-50);
-      flex: none;
-      transform: translateY(-1.2em);
-    }
+    /* Name as live text; the gold fill sweeps across it from the left on hover. */
     .wall__name {
+      flex: 0 1 auto;
+      min-width: 0;
       overflow: hidden;
       text-overflow: clip;
-      min-width: 0;
+      color: var(--bone);
+      background-image: linear-gradient(var(--gold), var(--gold));
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: 0% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      transition: background-size 600ms var(--ease), color 600ms var(--ease);
+    }
+    .wall__meta {
+      flex: none;
+      font-family: var(--mono);
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--bone-70);
+      opacity: 0;
+      transform: translateX(1.5rem);
+      transition: opacity var(--t) var(--ease), transform var(--t) var(--ease);
+    }
+    .wall__item:hover .wall__name {
+      color: transparent;
+      background-size: 100% 100%;
+    }
+    .wall__item:hover .wall__meta {
+      opacity: 1;
+      transform: none;
+    }
+    /* No hover on touch, and no room beside the name below 900px:
+       stack the label under the name and keep it visible. */
+    @media (max-width: 900px), (hover: none) {
+      .wall__item { flex-direction: column; align-items: flex-start; gap: .1rem; padding-block: .3em .45em; }
+      .wall__meta { opacity: 1; transform: none; white-space: normal; }
     }
 
     /* ------------------------------------------------------------------
@@ -730,7 +757,6 @@
       .meta { grid-template-columns: 1fr; gap: 1rem; }
       .hero h1 { font-size: clamp(2.75rem, 16vw, 4.75rem); max-width: none; }
       .wall__item { font-size: clamp(1.75rem, 9.6vw, 3rem); }
-      .wall__index { display: none; }
       .facts li span:last-child { white-space: normal; }
     }
 
@@ -812,16 +838,16 @@
       </div>
       <ul class="wall__list wrap" data-wall>
         <li class="wall__item display" data-wall-item>
-          <span class="wall__index" aria-hidden="true">01</span>
           <span class="wall__name">Curriculum Associates</span>
+          <span class="wall__meta">Technical Support Specialist, 2025 to now</span>
         </li>
         <li class="wall__item display" data-wall-item>
-          <span class="wall__index" aria-hidden="true">02</span>
           <span class="wall__name">Vimeo</span>
+          <span class="wall__meta">Customer Solutions Specialist, 2024 to 2025</span>
         </li>
         <li class="wall__item display" data-wall-item>
-          <span class="wall__index" aria-hidden="true">03</span>
           <span class="wall__name">Advanced UK</span>
+          <span class="wall__meta">Support Analyst, 2023 to 2024</span>
         </li>
       </ul>
     </section>
