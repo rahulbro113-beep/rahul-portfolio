@@ -7,6 +7,25 @@
   <meta name="description" content="Rahul owns what happens after the signature: customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
   <meta name="theme-color" content="#0A0C18">
 
+  <!-- Social cards. TODO: replace the domain below with the live one once Vercel assigns it. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Rahul">
+  <meta property="og:title" content="Rahul — I own what happens after the signature.">
+  <meta property="og:description" content="Customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
+  <meta property="og:url" content="https://rahul-portfolio.vercel.app/">
+  <meta property="og:image" content="https://rahul-portfolio.vercel.app/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="I own what happens after the signature. Rahul, customer onboarding, adoption and enterprise relationships.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rahul — I own what happens after the signature.">
+  <meta name="twitter:description" content="Customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
+  <meta name="twitter:image" content="https://rahul-portfolio.vercel.app/og.png">
+
+  <!-- Favicon: inline SVG (gold dot on void), plus a PNG for iOS home screens. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0C18'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23E3B778'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
   <script>
     // Decide before first paint whether the loader runs. Reduced-motion
     // visitors, and anyone without JS, get the page straight away.
@@ -299,8 +318,10 @@
       width: 100%;
       height: 100%;
     }
-    .hero__scene.is-fallback canvas { display: none; }
-    .hero__scene.is-fallback {
+    .hero__scene.is-fallback canvas,
+    html:not(.js) .hero__scene canvas { display: none; }
+    .hero__scene.is-fallback,
+    html:not(.js) .hero__scene {
       background:
         radial-gradient(55% 45% at 72% 42%, rgba(138, 147, 224, .16), transparent 70%),
         radial-gradient(38% 38% at 28% 72%, rgba(227, 183, 120, .09), transparent 70%);
@@ -1536,6 +1557,12 @@
           });
         }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
         Array.prototype.forEach.call(targets, function (el) { io.observe(el); });
+        // Keyboard users can tab into a section before it scrolls into view:
+        // reveal it at once so the focus ring is never inside a faded block.
+        document.addEventListener('focusin', function (e) {
+          var section = e.target.closest && e.target.closest('.reveal:not(.is-in)');
+          if (section) { section.classList.add('is-in'); io.unobserve(section); }
+        });
       })();
 
       // Live local time for Asia/Kolkata, shown in the header.
