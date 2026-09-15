@@ -1164,10 +1164,19 @@
         var MAX = THREE.MathUtils.degToRad(4);
         var touch = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches;
         var targetYaw = 0, targetPitch = 0, yaw = 0, pitch = 0;
+        // Keep the combined yaw and pitch inside the 4 degree budget, corners included.
+        function setTarget(y, p) {
+          var m = Math.sqrt(y * y + p * p);
+          if (m > MAX) { y *= MAX / m; p *= MAX / m; }
+          targetYaw = y;
+          targetPitch = p;
+        }
         if (!touch) {
           window.addEventListener('pointermove', function (e) {
-            targetYaw = (e.clientX / window.innerWidth * 2 - 1) * MAX;
-            targetPitch = (e.clientY / window.innerHeight * 2 - 1) * MAX * 0.6;
+            setTarget(
+              (e.clientX / window.innerWidth * 2 - 1) * MAX,
+              (e.clientY / window.innerHeight * 2 - 1) * MAX * 0.6
+            );
           }, { passive: true });
         }
 
@@ -1196,8 +1205,7 @@
           group.rotation.y += 0.008 * dt;
           group.position.y = Math.sin(clock * 0.18) * 0.15;
           if (touch) {
-            targetYaw = Math.sin(clock * 0.13) * MAX;
-            targetPitch = Math.sin(clock * 0.09 + 1.3) * MAX * 0.6;
+            setTarget(Math.sin(clock * 0.13) * MAX, Math.sin(clock * 0.09 + 1.3) * MAX * 0.6);
           }
           var ease = 1 - Math.exp(-dt * 1.6);
           yaw += (targetYaw - yaw) * ease;
