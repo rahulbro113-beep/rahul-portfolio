@@ -146,7 +146,7 @@
     .site-header__inner {
       min-height: var(--header-h);
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr auto auto;
       align-items: center;
       gap: 1rem 1.5rem;
       font-size: .78rem;
@@ -212,6 +212,37 @@
     }
     .nav a:hover { color: var(--bone); }
     .nav a:hover::after { transform: scaleX(1); }
+
+    /* Sound toggle: same voice as the nav, state in brackets. */
+    .sound {
+      position: relative;
+      justify-self: end;
+      margin: 0;
+      padding: .35rem 0;
+      border: 0;
+      background: none;
+      color: var(--bone-70);
+      font: inherit;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color var(--t) var(--ease);
+    }
+    .sound::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: var(--haze);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--t) var(--ease);
+    }
+    .sound:hover { color: var(--bone); }
+    .sound:hover::after { transform: scaleX(1); }
+    .sound__state { font-variant-numeric: tabular-nums; }
+    .sound[aria-pressed="true"] .sound__state { color: var(--gold); }
 
     /* Floating pill */
     .talk {
@@ -655,12 +686,13 @@
     @media (max-width: 1000px) {
       :root { --header-h: 4.6rem; }
       .site-header__inner {
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto auto;
         gap: .35rem 1rem;
         padding-block: .6rem;
       }
       .brand { grid-row: 1; grid-column: 1; }
-      .nav { grid-row: 1; grid-column: 2; }
+      .sound { grid-row: 1; grid-column: 2; }
+      .nav { grid-row: 1; grid-column: 3; }
       .locale {
         grid-row: 2;
         grid-column: 1 / -1;
@@ -688,6 +720,10 @@
 
     @media (max-width: 600px) {
       .brand__role { display: none; }
+      /* Row one: name and nav. Row two: clock left, sound right. */
+      .nav { grid-column: 2 / -1; justify-self: end; }
+      .locale { grid-column: 1 / 3; }
+      .sound { grid-row: 2; grid-column: 3; font-size: .72rem; }
     }
 
     @media (max-width: 480px) {
@@ -740,6 +776,8 @@
         <time id="clock" datetime="">--:--:--</time>
         <span class="label" style="letter-spacing:.08em">IST</span>
       </p>
+
+      <button class="sound" id="sound-toggle" type="button" aria-pressed="false">Sound <span class="sound__state">[OFF]</span></button>
 
       <nav class="nav" aria-label="Primary">
         <a href="#work">Work</a>
@@ -1304,6 +1342,124 @@
       // Three.js is deferred, so it has run by DOMContentLoaded (or failed to).
       if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initScene); }
       else { initScene(); }
+
+      // ----------------------------------------------------------------
+      // Sound: off by default, never autoplays, session-only. The
+      // AudioContext is created on the first press of the toggle because
+      // browsers refuse to start one without a user gesture. Two layers:
+      // a very quiet pad (two detuned sines through a 400Hz lowpass, held
+      // below -30dB) and a short soft click on nav and row hover.
+      // ----------------------------------------------------------------
+      var soundBtn = document.getElementById('sound-toggle');
+      var soundState = soundBtn.querySelector('.sound__state');
+      var sound = { enabled: false, ctx: null, master: null, pad: null, lastClick: 0 }; // session state, not persisted
+      var PAD_DB = -34;   // ambient level, kept under the -30dB ceiling
+      var CLICK_DB = -24; // peak of the hover click
+
+      function dbToGain(db) { return Math.pow(10, db / 20); }
+
+      function ensureAudio() {
+        if (sound.ctx) { return sound.ctx; }
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) { return null; }
+        var ctx;
+        try { ctx = new AC(); } catch (e) { return null; }
+
+        var master = ctx.createGain();
+        master.gain.value = 1;
+        master.connect(ctx.destination);
+
+        // Ambient pad: two sines a few cents apart, so they beat slowly.
+        var pad = ctx.createGain();
+        pad.gain.value = 0;
+        var lowpass = ctx.createBiquadFilter();
+        lowpass.type = 'lowpass';
+        lowpass.frequency.value = 400;
+        lowpass.Q.value = 0.7;
+        var oscA = ctx.createOscillator();
+        oscA.type = 'sine';
+        oscA.frequency.value = 196;      // G3
+        var oscB = ctx.createOscillator();
+        oscB.type = 'sine';
+        oscB.frequency.value = 196;
+        oscB.detune.value = 9;           // cents
+        oscA.connect(lowpass);
+        oscB.connect(lowpass);
+        lowpass.connect(pad);
+        pad.connect(master);
+        oscA.start();
+        oscB.start();
+
+        sound.ctx = ctx;
+        sound.master = master;
+        sound.pad = pad;
+        return ctx;
+      }
+
+      function rampPad(toDb, seconds) {
+        var g = sound.pad.gain;
+        var t = sound.ctx.currentTime;
+        g.cancelScheduledValues(t);
+        g.setValueAtTime(g.value, t);
+        g.linearRampToValueAtTime(toDb === null ? 0 : dbToGain(toDb), t + seconds);
+      }
+
+      function setSound(on) {
+        if (on) {
+          var ctx = ensureAudio();
+          if (!ctx) { on = false; soundBtn.disabled = true; }
+        }
+        sound.enabled = on;
+        soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        soundState.textContent = on ? '[ON]' : '[OFF]';
+        if (!sound.ctx) { return; }
+        if (on) {
+          var resumed = sound.ctx.state === 'suspended' ? sound.ctx.resume() : Promise.resolve();
+          resumed.then(function () { rampPad(PAD_DB, 1.5); }, function () {});
+        } else {
+          rampPad(null, 0.6);
+          window.setTimeout(function () {
+            if (!sound.enabled && sound.ctx.state === 'running') { sound.ctx.suspend(); }
+          }, 700);
+        }
+      }
+
+      // Soft click: a short sine blip with a fast envelope, rate-limited.
+      function softClick() {
+        if (!sound.enabled || !sound.ctx || sound.ctx.state !== 'running') { return; }
+        var now = performance.now();
+        if (now - sound.lastClick < 90) { return; }
+        sound.lastClick = now;
+        var ctx = sound.ctx;
+        var t = ctx.currentTime;
+        var osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1800, t);
+        osc.frequency.exponentialRampToValueAtTime(900, t + 0.04);
+        var env = ctx.createGain();
+        env.gain.setValueAtTime(0.0001, t);
+        env.gain.exponentialRampToValueAtTime(dbToGain(CLICK_DB), t + 0.004);
+        env.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+        osc.connect(env);
+        env.connect(sound.master);
+        osc.start(t);
+        osc.stop(t + 0.08);
+      }
+
+      soundBtn.addEventListener('click', function () { setSound(!sound.enabled); });
+
+      // Hover clicks: mouse and pen only, so a tap on touch does not tick.
+      function onHover(e) { if (e.pointerType !== 'touch') { softClick(); } }
+      Array.prototype.forEach.call(document.querySelectorAll('.nav a, .row'), function (el) {
+        el.addEventListener('pointerenter', onHover);
+      });
+
+      // Do not hum on in a background tab; pick up again when it returns.
+      document.addEventListener('visibilitychange', function () {
+        if (!sound.ctx || !sound.enabled) { return; }
+        if (document.hidden) { rampPad(null, 0.3); }
+        else { rampPad(PAD_DB, 1.5); }
+      });
 
       // Live local time for Asia/Kolkata, shown in the header.
       var clock = document.getElementById('clock');
