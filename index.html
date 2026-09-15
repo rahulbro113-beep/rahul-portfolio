@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rahul — Customer onboarding, adoption, enterprise relationships</title>
+  <meta name="description" content="Rahul owns what happens after the signature: customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
+  <meta name="theme-color" content="#0A0C18">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ------------------------------------------------------------------
+       Tokens
+       ------------------------------------------------------------------ */
+    :root {
+      --void: #0A0C18;                    /* page background */
+      --panel: #12162B;                   /* raised sections */
+      --bone: #F3F0EA;                    /* primary text */
+      --gold: #E3B778;                    /* single accent, used sparingly */
+      --haze: #8A93E0;                    /* secondary accent, 3D and hover states only */
+      --rule: rgba(243, 240, 234, .16);   /* hairlines */
+
+      --bone-70: rgba(243, 240, 234, .70);
+      --bone-50: rgba(243, 240, 234, .50);
+
+      --display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --mono: "DM Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+      --gutter: clamp(1rem, 4vw, 4rem);
+      --header-h: 4rem;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+      --t: 420ms;
+
+      color-scheme: dark;
+    }
+
+    /* ------------------------------------------------------------------
+       Base
+       ------------------------------------------------------------------ */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      background: var(--void);
+      overflow-x: clip;
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-width: 0;
+      overflow-x: clip;
+      background: var(--void);
+      color: var(--bone);
+      font-family: var(--mono);
+      font-size: clamp(.9rem, .85rem + .25vw, 1.02rem);
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    h1, h2, h3, p, ul, dl, dd { margin: 0; }
+    ul { padding: 0; list-style: none; }
+    a { color: inherit; text-decoration: none; }
+    img, svg { max-width: 100%; height: auto; display: block; }
+
+    :focus { outline: none; }
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    ::selection { background: var(--gold); color: var(--void); }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0 0 0 0);
+      white-space: nowrap; border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: .75rem; left: .75rem;
+      z-index: 100;
+      padding: .5rem .9rem;
+      background: var(--bone);
+      color: var(--void);
+      font-size: .8rem;
+      transform: translateY(-200%);
+    }
+    .skip-link:focus-visible { transform: none; outline-offset: 2px; }
+
+    .display {
+      font-family: var(--display);
+      font-weight: 400;
+      letter-spacing: -.015em;
+      line-height: .95;
+    }
+
+    .label {
+      font-size: .72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--bone-50);
+    }
+
+    .wrap { padding-inline: var(--gutter); }
+
+    section { position: relative; }
+
+    /* ------------------------------------------------------------------
+       Header
+       ------------------------------------------------------------------ */
+    .site-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 50;
+      padding-top: env(safe-area-inset-top, 0px);
+      background: rgba(10, 12, 24, .82);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .site-header__inner {
+      min-height: var(--header-h);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 1rem 1.5rem;
+      font-size: .78rem;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: .1rem;
+      min-width: 0;
+    }
+    .brand__name {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .brand__role {
+      color: var(--bone-50);
+      font-size: .68rem;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .locale {
+      justify-self: center;
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      color: var(--bone-70);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .locale__dot {
+      width: .4rem; height: .4rem;
+      border-radius: 50%;
+      background: var(--gold);
+      flex: none;
+    }
+    .locale time { color: var(--bone); }
+
+    .nav { display: flex; gap: clamp(.9rem, 2vw, 1.75rem); }
+    .nav a {
+      position: relative;
+      padding: .35rem 0;
+      color: var(--bone-70);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      transition: color var(--t) var(--ease);
+    }
+    .nav a::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: var(--haze);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--t) var(--ease);
+    }
+    .nav a:hover { color: var(--bone); }
+    .nav a:hover::after { transform: scaleX(1); }
+
+    /* Floating pill */
+    .talk {
+      position: fixed;
+      right: calc(var(--gutter) * .75);
+      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+      z-index: 60;
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .8rem 1.25rem;
+      border-radius: 999px;
+      background: var(--bone);
+      color: var(--void);
+      font-size: .78rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      transition: background var(--t) var(--ease), color var(--t) var(--ease), transform var(--t) var(--ease);
+    }
+    .talk__dot {
+      width: .45rem; height: .45rem;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .talk:hover { background: var(--haze); color: var(--void); transform: translateY(-2px); }
+    .talk:focus-visible { outline-offset: 3px; }
+
+    /* ------------------------------------------------------------------
+       Hero
+       ------------------------------------------------------------------ */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      padding-top: calc(var(--header-h) + 2rem);
+      padding-bottom: 4rem;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 11.5vw, 12.5rem);
+      max-width: 12ch;
+      text-wrap: balance;
+      overflow-wrap: anywhere;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* ------------------------------------------------------------------
+       Wordmark wall (static for now; animated in a later phase)
+       ------------------------------------------------------------------ */
+    .wall {
+      overflow: hidden;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding-block: clamp(1rem, 3vw, 2.5rem);
+    }
+    .wall__head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: clamp(1rem, 3vw, 2.5rem);
+    }
+    .wall__list { display: block; }
+    .wall__item {
+      font-size: clamp(2.4rem, 8.4vw, 9.5rem);
+      white-space: nowrap;
+      line-height: 1.05;
+      padding-block: .05em;
+      border-top: 1px solid var(--rule);
+      display: flex;
+      align-items: baseline;
+      gap: .35em;
+      min-width: 0;
+    }
+    .wall__item:first-child { border-top: 0; }
+    .wall__item:nth-child(2) { justify-content: flex-end; }
+    .wall__item:nth-child(3) { justify-content: center; }
+    .wall__index {
+      font-family: var(--mono);
+      font-size: .72rem;
+      letter-spacing: .12em;
+      color: var(--bone-50);
+      flex: none;
+      transform: translateY(-1.2em);
+    }
+    .wall__name {
+      overflow: hidden;
+      text-overflow: clip;
+      min-width: 0;
+    }
+
+    /* ------------------------------------------------------------------
+       Section header pattern
+       ------------------------------------------------------------------ */
+    .section-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: end;
+      gap: 1.5rem;
+      padding-block: clamp(3rem, 8vw, 7rem) clamp(1.5rem, 3vw, 2.5rem);
+    }
+    .section-head h2 {
+      font-size: clamp(2.4rem, 6vw, 5.5rem);
+    }
+    .section-head .label { padding-bottom: .5em; }
+
+    /* ------------------------------------------------------------------
+       Work list
+       ------------------------------------------------------------------ */
+    .work__list { border-top: 1px solid var(--rule); }
+
+    .row {
+      display: block;
+      border-bottom: 1px solid var(--rule);
+      padding-block: clamp(1.25rem, 2.5vw, 2rem);
+      transition: transform var(--t) var(--ease);
+    }
+    .row__main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.2fr) auto;
+      align-items: baseline;
+      gap: 1rem 2rem;
+    }
+    .row__title {
+      font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+      line-height: 1.05;
+      transition: color var(--t) var(--ease);
+    }
+    .row__summary { color: var(--bone-70); font-size: .9em; }
+    .row__arrow {
+      color: var(--bone-50);
+      font-size: 1.2rem;
+      transition: transform var(--t) var(--ease), color var(--t) var(--ease);
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .chip {
+      display: inline-block;
+      padding: .25rem .6rem;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      font-size: .68rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--bone-70);
+      white-space: nowrap;
+      transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
+    }
+
+    .row__detail {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows var(--t) var(--ease), opacity var(--t) var(--ease), margin-top var(--t) var(--ease);
+      margin-top: 0;
+    }
+    .row__detail > span {
+      display: block;
+      overflow: hidden;
+      min-height: 0;
+      color: var(--haze);
+      font-size: .8rem;
+      letter-spacing: .02em;
+    }
+
+    .row:hover,
+    .row:focus-visible {
+      transform: translateX(clamp(.5rem, 1.5vw, 1.25rem));
+    }
+    .row:hover .row__detail,
+    .row:focus-visible .row__detail {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: .85rem;
+    }
+    .row:hover .row__title,
+    .row:focus-visible .row__title { color: var(--haze); }
+    .row:hover .row__arrow,
+    .row:focus-visible .row__arrow { color: var(--haze); transform: translateX(.35rem); }
+    .row:hover .chip { border-color: var(--haze); color: var(--bone); }
+    .row:focus-visible { outline-offset: 6px; }
+
+    /* ------------------------------------------------------------------
+       Case studies
+       ------------------------------------------------------------------ */
+    .case {
+      padding-block: clamp(4rem, 10vw, 9rem);
+      border-top: 1px solid var(--rule);
+      scroll-margin-top: calc(var(--header-h) + 1rem);
+    }
+    .case:first-of-type { border-top: 0; }
+    .case__num {
+      display: block;
+      margin-bottom: 1.25rem;
+      color: var(--gold);
+    }
+    .case__title {
+      font-size: clamp(2.6rem, 7vw, 7rem);
+      max-width: 14ch;
+      text-wrap: balance;
+      overflow-wrap: anywhere;
+    }
+    .case__tags { margin-top: 1.5rem; }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.5rem 2rem;
+      margin-top: clamp(2rem, 5vw, 4rem);
+      padding-block: 1.25rem;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+    .meta div { min-width: 0; }
+    .meta dt { margin-bottom: .35rem; }
+    .meta dd { font-size: .9em; overflow-wrap: anywhere; }
+
+    .case__body {
+      margin-top: clamp(2rem, 5vw, 4rem);
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 2rem clamp(2rem, 6vw, 6rem);
+    }
+    .case__lede {
+      font-family: var(--display);
+      font-style: italic;
+      font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+      line-height: 1.2;
+      letter-spacing: -.01em;
+      text-wrap: balance;
+    }
+    .case__prose {
+      max-width: 62ch;
+      color: var(--bone-70);
+      line-height: 1.75;
+    }
+
+    /* ------------------------------------------------------------------
+       About panel
+       ------------------------------------------------------------------ */
+    .about {
+      background: var(--panel);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      padding-block: clamp(4rem, 10vw, 9rem);
+      scroll-margin-top: var(--header-h);
+    }
+    .about__statement {
+      font-size: clamp(1.9rem, 4.6vw, 4.6rem);
+      line-height: 1.12;
+      letter-spacing: -.012em;
+      max-width: 22ch;
+      text-wrap: pretty;
+      margin-top: 1.25rem;
+    }
+    .about__statement em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2rem;
+      margin-top: clamp(3rem, 7vw, 6rem);
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+    }
+    .facts h3 { margin-bottom: 1rem; }
+    .facts li {
+      padding-block: .45rem;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      overflow-wrap: anywhere;
+    }
+    .facts li:last-child { border-bottom: 0; }
+    .facts li span:last-child { color: var(--bone-50); font-size: .85em; white-space: nowrap; }
+
+    /* ------------------------------------------------------------------
+       Contact
+       ------------------------------------------------------------------ */
+    .contact {
+      padding-block: clamp(5rem, 14vw, 12rem) clamp(3rem, 8vw, 6rem);
+      scroll-margin-top: var(--header-h);
+    }
+    .contact h2 {
+      font-size: clamp(2.6rem, 8vw, 8.5rem);
+      max-width: 12ch;
+      text-wrap: balance;
+      overflow-wrap: anywhere;
+    }
+    .contact__links {
+      margin-top: clamp(2rem, 5vw, 4rem);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 3rem;
+    }
+    .contact__links a {
+      position: relative;
+      display: inline-block;
+      padding-bottom: .25rem;
+      border-bottom: 1px solid var(--rule);
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+      overflow-wrap: anywhere;
+      transition: color var(--t) var(--ease), border-color var(--t) var(--ease);
+    }
+    .contact__links a:hover { color: var(--haze); border-color: var(--haze); }
+
+    .site-footer {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem 2rem;
+      padding-block: 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid var(--rule);
+      color: var(--bone-50);
+      font-size: .72rem;
+      letter-spacing: .06em;
+    }
+
+    /* ------------------------------------------------------------------
+       Responsive
+       ------------------------------------------------------------------ */
+    @media (max-width: 900px) {
+      .row__main {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "title arrow"
+          "tags  tags"
+          "summary summary";
+        gap: .75rem 1rem;
+      }
+      .row__title { grid-area: title; }
+      .row__arrow { grid-area: arrow; align-self: start; }
+      .row .tags { grid-area: tags; }
+      .row__summary { grid-area: summary; }
+
+      .case__body { grid-template-columns: 1fr; }
+      .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 1000px) {
+      :root { --header-h: 4.6rem; }
+      .site-header__inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: .35rem 1rem;
+        padding-block: .6rem;
+      }
+      .brand { grid-row: 1; grid-column: 1; }
+      .nav { grid-row: 1; grid-column: 2; }
+      .locale {
+        grid-row: 2;
+        grid-column: 1 / -1;
+        justify-self: start;
+        font-size: .7rem;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .nav { gap: 1rem; }
+      .nav a { font-size: .72rem; }
+
+      /* Shift the row's content instead of the row box, so the arrow never
+         gets pushed into the viewport edge where the gutter is narrow. */
+      .row { transition: padding-left var(--t) var(--ease); }
+      .row:hover,
+      .row:focus-visible { transform: none; padding-left: .6rem; }
+
+      .section-head { grid-template-columns: 1fr; gap: .75rem; }
+      .section-head .label { padding-bottom: 0; }
+
+      .facts { grid-template-columns: 1fr; gap: 2.5rem; }
+      .talk { right: 1rem; padding: .7rem 1rem; font-size: .72rem; }
+    }
+
+    @media (max-width: 600px) {
+      .brand__role { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .meta { grid-template-columns: 1fr; gap: 1rem; }
+      .hero h1 { font-size: clamp(2.75rem, 16vw, 4.75rem); max-width: none; }
+      .wall__item { font-size: clamp(1.75rem, 9.6vw, 3rem); }
+      .wall__index { display: none; }
+      .facts li span:last-child { white-space: normal; }
+    }
+
+    /* ------------------------------------------------------------------
+       Motion preferences
+       ------------------------------------------------------------------ */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+        animation-iteration-count: 1 !important;
+      }
+      .row:hover, .row:focus-visible { transform: none; padding-left: 0; }
+      .row:hover .row__arrow, .row:focus-visible .row__arrow { transform: none; }
+      .talk:hover { transform: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#work">Skip to work</a>
+
+  <!-- ============================================================
+       Header
+       ============================================================ -->
+  <header class="site-header">
+    <div class="site-header__inner wrap">
+      <a class="brand" href="#top" aria-label="Rahul, back to top">
+        <span class="brand__name">Rahul</span>
+        <span class="brand__role">Customer onboarding · Adoption · Enterprise relationships</span>
+      </a>
+
+      <p class="locale" aria-live="off">
+        <span class="locale__dot" aria-hidden="true"></span>
+        <span>Bangalore</span>
+        <time id="clock" datetime="">--:--:--</time>
+        <span class="label" style="letter-spacing:.08em">IST</span>
+      </p>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <a class="talk" href="#contact">
+    <span class="talk__dot" aria-hidden="true"></span>
+    <span>Let's talk</span>
+  </a>
+
+  <main id="top">
+
+    <!-- ============================================================
+         Hero
+         ============================================================ -->
+    <section class="hero wrap" aria-label="Introduction">
+      <h1 class="display">I own what happens <em>after</em> the signature.</h1>
+    </section>
+
+    <!-- ============================================================
+         Wordmark wall (static type; animation comes later)
+         ============================================================ -->
+    <section class="wall" aria-label="Companies">
+      <div class="wall__head wrap">
+        <span class="label">Where the work happened</span>
+        <span class="label">2023 to now</span>
+      </div>
+      <ul class="wall__list wrap" data-wall>
+        <li class="wall__item display" data-wall-item>
+          <span class="wall__index" aria-hidden="true">01</span>
+          <span class="wall__name">Curriculum Associates</span>
+        </li>
+        <li class="wall__item display" data-wall-item>
+          <span class="wall__index" aria-hidden="true">02</span>
+          <span class="wall__name">Vimeo</span>
+        </li>
+        <li class="wall__item display" data-wall-item>
+          <span class="wall__index" aria-hidden="true">03</span>
+          <span class="wall__name">Advanced UK</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         Work list
+         ============================================================ -->
+    <section class="work" id="work" aria-labelledby="work-title" style="scroll-margin-top: var(--header-h)">
+      <div class="section-head wrap">
+        <h2 class="display" id="work-title">Work</h2>
+        <span class="label">Four ways the same job shows up</span>
+      </div>
+
+      <div class="work__list wrap">
+        <a class="row" href="#case-1">
+          <div class="row__main">
+            <span class="row__title display">The first ninety days of a customer relationship</span>
+            <span class="tags">
+              <span class="chip">Onboarding</span>
+              <span class="chip">Discovery</span>
+              <span class="chip">Time to value</span>
+            </span>
+            <span class="row__summary">A signed contract and a working customer are not the same thing.</span>
+            <span class="row__arrow" aria-hidden="true">→</span>
+          </div>
+          <span class="row__detail"><span>Vimeo, Curriculum Associates · 2024 to now · Post-sale owner · Salesforce, Gainsight</span></span>
+        </a>
+
+        <a class="row" href="#case-2">
+          <div class="row__main">
+            <span class="row__title display">Reading an account before it goes quiet</span>
+            <span class="tags">
+              <span class="chip">Account health</span>
+              <span class="chip">Risk</span>
+              <span class="chip">Recovery</span>
+            </span>
+            <span class="row__summary">The accounts that leave rarely announce it first.</span>
+            <span class="row__arrow" aria-hidden="true">→</span>
+          </div>
+          <span class="row__detail"><span>Vimeo · 2024 to 2025 · Enterprise and mid-market portfolio · Salesforce, Gainsight</span></span>
+        </a>
+
+        <a class="row" href="#case-3">
+          <div class="row__main">
+            <span class="row__title display">Making expertise scale past one person</span>
+            <span class="tags">
+              <span class="chip">Knowledge systems</span>
+              <span class="chip">AI tooling</span>
+              <span class="chip">Enablement</span>
+            </span>
+            <span class="row__summary">Answering the same question twice is a system problem.</span>
+            <span class="row__arrow" aria-hidden="true">→</span>
+          </div>
+          <span class="row__detail"><span>Vimeo, Curriculum Associates · 2024 to now · Built independently · AI tooling, internal automation</span></span>
+        </a>
+
+        <a class="row" href="#case-4">
+          <div class="row__main">
+            <span class="row__title display">The relationship layer</span>
+            <span class="tags">
+              <span class="chip">Stakeholders</span>
+              <span class="chip">Escalation</span>
+              <span class="chip">Trust</span>
+            </span>
+            <span class="row__summary">When something breaks, the second thing at risk is confidence.</span>
+            <span class="row__arrow" aria-hidden="true">→</span>
+          </div>
+          <span class="row__detail"><span>Curriculum Associates · 2025 to now · Client-facing · Salesforce, Slack</span></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Case studies
+         ============================================================ -->
+    <section aria-label="Case studies" style="margin-top: clamp(3rem, 8vw, 7rem)">
+
+      <article class="case wrap" id="case-1" aria-labelledby="case-1-title">
+        <span class="case__num label">Case 01</span>
+        <h2 class="case__title display" id="case-1-title">The first ninety days of a customer relationship</h2>
+        <div class="tags case__tags">
+          <span class="chip">Onboarding</span>
+          <span class="chip">Discovery</span>
+          <span class="chip">Time to value</span>
+        </div>
+        <dl class="meta">
+          <div><dt class="label">Company</dt><dd>Vimeo, Curriculum Associates</dd></div>
+          <div><dt class="label">Years</dt><dd>2024 to now</dd></div>
+          <div><dt class="label">Role</dt><dd>Post-sale owner</dd></div>
+          <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
+        </dl>
+        <div class="case__body">
+          <p class="case__lede">A signed contract and a working customer are not the same thing.</p>
+          <p class="case__prose">The gap between a signature and real usage is where most enterprise relationships quietly fail. I own the post-sale welcome: the first conversation, the discovery that finds out what this customer is actually trying to do, and the onboarding path that takes them from initial setup to the point where the product is earning its keep. Structured, not improvised, because a customer who is guessing at their own rollout is a customer who churns at renewal.</p>
+        </div>
+      </article>
+
+      <article class="case wrap" id="case-2" aria-labelledby="case-2-title">
+        <span class="case__num label">Case 02</span>
+        <h2 class="case__title display" id="case-2-title">Reading an account before it goes quiet</h2>
+        <div class="tags case__tags">
+          <span class="chip">Account health</span>
+          <span class="chip">Risk</span>
+          <span class="chip">Recovery</span>
+        </div>
+        <dl class="meta">
+          <div><dt class="label">Company</dt><dd>Vimeo</dd></div>
+          <div><dt class="label">Years</dt><dd>2024 to 2025</dd></div>
+          <div><dt class="label">Role</dt><dd>Enterprise and mid-market portfolio</dd></div>
+          <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
+        </dl>
+        <div class="case__body">
+          <p class="case__lede">The accounts that leave rarely announce it first.</p>
+          <p class="case__prose">I carried a portfolio of enterprise and mid-market accounts and watched them for the signals that come before a renewal conversation goes badly. When a major enterprise retail account started drifting toward churn, the answer was not another check-in call. It was a specific set of recommendations built around how they had actually configured things and what they were trying to get out of it. The account stayed.</p>
+        </div>
+      </article>
+
+      <article class="case wrap" id="case-3" aria-labelledby="case-3-title">
+        <span class="case__num label">Case 03</span>
+        <h2 class="case__title display" id="case-3-title">Making expertise scale past one person</h2>
+        <div class="tags case__tags">
+          <span class="chip">Knowledge systems</span>
+          <span class="chip">AI tooling</span>
+          <span class="chip">Enablement</span>
+        </div>
+        <dl class="meta">
+          <div><dt class="label">Company</dt><dd>Vimeo, Curriculum Associates</dd></div>
+          <div><dt class="label">Years</dt><dd>2024 to now</dd></div>
+          <div><dt class="label">Role</dt><dd>Built independently</dd></div>
+          <div><dt class="label">Tools</dt><dd>AI tooling, internal automation</dd></div>
+        </dl>
+        <div class="case__body">
+          <p class="case__lede">Answering the same question twice is a system problem.</p>
+          <p class="case__prose">Every support organisation has a set of questions it answers over and over, and every one of those is time not spent on the accounts that need judgment. I built the self-service knowledge base so the next customer did not need me for what the last one had asked. On my own initiative I built an AI-powered chatbot and an internal automation tool, both aimed at the same thing: putting what I know somewhere it can be used without me in the room. I also mentored a group of new hires through their first two months, which is the same problem solved with people instead of software.</p>
+        </div>
+      </article>
+
+      <article class="case wrap" id="case-4" aria-labelledby="case-4-title">
+        <span class="case__num label">Case 04</span>
+        <h2 class="case__title display" id="case-4-title">The relationship layer</h2>
+        <div class="tags case__tags">
+          <span class="chip">Stakeholders</span>
+          <span class="chip">Escalation</span>
+          <span class="chip">Trust</span>
+        </div>
+        <dl class="meta">
+          <div><dt class="label">Company</dt><dd>Curriculum Associates</dd></div>
+          <div><dt class="label">Years</dt><dd>2025 to now</dd></div>
+          <div><dt class="label">Role</dt><dd>Client-facing</dd></div>
+          <div><dt class="label">Tools</dt><dd>Salesforce, Slack</dd></div>
+        </dl>
+        <div class="case__body">
+          <p class="case__lede">When something breaks, the second thing at risk is confidence.</p>
+          <p class="case__prose">I work with everyone from system administrators to senior leadership, and the same escalation needs to sound different to each of them. What holds it together is being predictable rather than impressive: acknowledge fast so nobody fills the silence with worst cases, make one clear call rather than hedging across three, and debrief the same day in outcomes rather than vocabulary nobody outside the team uses. Trust is built in how you behave on the bad days, not the good ones.</p>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ============================================================
+         About panel
+         ============================================================ -->
+    <section class="about" id="about" aria-labelledby="about-title">
+      <div class="wrap">
+        <span class="label" id="about-title">About</span>
+        <p class="about__statement display">Solving a problem once proves you can. Making sure it stops arriving is <em>the actual job.</em> That is why I build the documentation, the knowledge base and the tooling before anyone asks for it.</p>
+
+        <div class="facts">
+          <div>
+            <h3 class="label">Where I have worked</h3>
+            <ul>
+              <li><span>Curriculum Associates</span><span>2025 to now</span></li>
+              <li><span>Vimeo</span><span>2024 to 2025</span></li>
+              <li><span>Advanced UK</span><span>2023 to 2024</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="label">Tools</h3>
+            <ul>
+              <li><span>Salesforce</span></li>
+              <li><span>Gainsight</span></li>
+              <li><span>Excel</span></li>
+              <li><span>AI tooling</span></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="label">Also</h3>
+            <ul>
+              <li><span>Bangalore, India</span></li>
+              <li><span>English, Hindi, Kannada</span></li>
+              <li><span>BCA</span><span>Jain University</span></li>
+              <li><span>AI Fluency</span><span>Anthropic</span></li>
+              <li><span>Generative AI Fundamentals</span><span>Databricks</span></li>
+              <li><span>Inbound Sales</span><span>HubSpot</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         Contact
+         ============================================================ -->
+    <section class="contact wrap" id="contact" aria-labelledby="contact-title">
+      <span class="label">Contact</span>
+      <h2 class="display" id="contact-title" style="margin-top:1.25rem">Currently in Bangalore. Say hi.</h2>
+      <div class="contact__links">
+        <a href="mailto:rahulbro113@gmail.com">rahulbro113@gmail.com</a>
+        <!-- TODO: replace href with your LinkedIn profile URL -->
+        <a href="#" rel="me noopener" data-linkedin>LinkedIn</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer wrap">
+    <span>Rahul · Bangalore</span>
+    <span>&copy; <span id="year">2026</span></span>
+  </footer>
+
+  <script>
+    (function () {
+      // Live local time for Asia/Kolkata, shown in the header.
+      var clock = document.getElementById('clock');
+      var fmt = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hourCycle: 'h23'
+      });
+      var iso = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hourCycle: 'h23'
+      });
+
+      function tick() {
+        var now = new Date();
+        clock.textContent = fmt.format(now);
+        // en-CA yields "YYYY-MM-DD, HH:MM:SS"; normalise to an ISO-like datetime.
+        clock.setAttribute('datetime', iso.format(now).replace(', ', 'T') + '+05:30');
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      // Footer year.
+      document.getElementById('year').textContent = String(new Date().getFullYear());
+
+      // Keep the header height token honest when the header wraps to two rows.
+      var header = document.querySelector('.site-header');
+      function measure() {
+        document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+      }
+      measure();
+      window.addEventListener('resize', measure);
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(measure); }
+    })();
+  </script>
+</body>
+</html>
