@@ -10,7 +10,6 @@
   <script>
     // Decide before first paint whether the loader runs. Reduced-motion
     // visitors, and anyone without JS, get the page straight away.
-    // Placed ahead of the stylesheet so a slow font request cannot stall it.
     (function () {
       var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!reduce) { document.documentElement.classList.add('loading'); }
@@ -19,7 +18,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <!-- Loaded without blocking render, so the loader can paint and count
+       while the font CSS is still in flight. The loader watches this link. -->
+  <link id="fonts-css" rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap"></noscript>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -321,11 +323,13 @@
     .loader.is-done {
       opacity: 0;
       pointer-events: none;
-      transition: opacity 500ms var(--ease);
+      /* Symmetric curve: the expo-out easing front-loads a fade into ~120ms. */
+      transition: opacity 500ms cubic-bezier(.45, 0, .55, 1);
     }
     html.loading { overflow: hidden; }
 
     .loader__count {
+      visibility: hidden; /* shown once DM Mono is ready, so the digits never swap face mid-count */
       font-family: var(--mono);
       font-weight: 300;
       font-size: clamp(6rem, 24vw, 22rem);
@@ -335,6 +339,7 @@
       align-self: flex-start;
       margin-left: -.06em; /* optical alignment of the first digit with the rule */
     }
+    .loader__count.is-ready { visibility: visible; }
     .loader__rule {
       position: relative;
       height: 1px;
@@ -711,9 +716,10 @@
 </head>
 
 <body>
-  <div class="loader" id="loader" aria-hidden="true">
-    <div class="loader__count" id="loader-count">0</div>
-    <div class="loader__rule"><span class="loader__fill" id="loader-fill"></span></div>
+  <div class="loader" id="loader">
+    <p class="visually-hidden" role="status">Loading</p>
+    <div class="loader__count" id="loader-count" aria-hidden="true">0</div>
+    <div class="loader__rule" aria-hidden="true"><span class="loader__fill" id="loader-fill"></span></div>
   </div>
 
   <a class="skip-link" href="#work">Skip to work</a>
@@ -1008,12 +1014,20 @@
       var root = document.documentElement;
       var loader = document.getElementById('loader');
       var loaderHasRun = false; // first paint only; anchor and bfcache navigation must not re-run it
+      var inerted = [];         // page regions made inert while the loader covers them
+      var resumeScene = null;   // set by the hero scene; called once the loader lifts
 
       function finishLoader() {
-        loader.classList.add('is-done');          // 500ms opacity fade (CSS)
-        root.classList.remove('loading');
-        root.classList.add('revealed');           // hero words stagger in behind the fade
-        window.setTimeout(function () { loader.hidden = true; }, 520);
+        // Hold the completed 100 for a beat so it registers, then fade.
+        window.setTimeout(function () {
+          loader.classList.add('is-done');          // 500ms opacity fade (CSS)
+          root.classList.remove('loading');
+          root.classList.add('revealed');           // hero words stagger in behind the fade
+          inerted.forEach(function (el) { el.inert = false; });
+          inerted = [];
+          if (resumeScene) { resumeScene(); }
+          window.setTimeout(function () { loader.hidden = true; }, 520);
+        }, 160);
       }
 
       function runLoader() {
@@ -1023,43 +1037,82 @@
         // The head script only adds .loading when motion is allowed and JS is on.
         if (!root.classList.contains('loading')) { loader.hidden = true; return; }
 
+        // Nothing behind the loader should take focus or clicks until it lifts.
+        Array.prototype.forEach.call(document.body.children, function (el) {
+          if (el !== loader && !el.inert) { el.inert = true; inerted.push(el); }
+        });
+
         var count = document.getElementById('loader-count');
         var fill = document.getElementById('loader-fill');
         var MIN_MS = 900;      // floor: the counter cannot reach 100 before this
         var SPEED = 260;       // max units per second when assets are ahead of the counter
-        var STALL_MS = 12000;  // safety net for a hung request; only fires if load never does
+        var STALL_MS = 8000;   // safety net for a hung request; only fires if load never does
         var start = performance.now();
         var last = start;
         var shown = 0;
         var target = 5;        // markup parsed and script running
-        var loaded = false;
+        var loaded = false;    // window load has fired
+        var fontsDone = false; // document.fonts.ready has settled after the font CSS applied
+        var sheetSeen = false;
 
         function raise(n) { if (n > target) { target = n; } }
-
-        // Milestone 1: the Google Fonts stylesheet has arrived.
-        var fontsLink = document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]');
-        if (!fontsLink || fontsLink.sheet) {
-          raise(35);
-        } else {
-          fontsLink.addEventListener('load', function () { raise(35); });
-          fontsLink.addEventListener('error', function () { raise(35); });
+        // Each real milestone contributes its share, in whatever order it lands;
+        // 100 only once the fonts have settled and the window has loaded.
+        function recompute() {
+          var t = 5 + (sheetSeen ? 25 : 0) + (fontsDone ? 35 : 0) + (loaded ? 30 : 0);
+          raise(loaded && fontsDone ? 100 : t);
         }
 
-        // Milestone 2: every font face that is in use has loaded (or failed).
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(function () { raise(80); });
+        // The digits stay hidden until the mono face is ready (rule fills meanwhile).
+        var digitsShown = false;
+        function showDigits() {
+          if (!digitsShown) { digitsShown = true; count.classList.add('is-ready'); }
+        }
+        window.setTimeout(showDigits, 1500);
+
+        // Milestone 2: once the font CSS has applied, request the faces the
+        // page uses and wait for document.fonts.ready. Asking before the
+        // @font-face rules exist would resolve at once with nothing loaded.
+        function fontsSettled() { fontsDone = true; recompute(); }
+        function watchFonts() {
+          if (sheetSeen) { return; }
+          sheetSeen = true;
+          recompute();
+          if (!(document.fonts && document.fonts.load)) { fontsSettled(); return; }
+          var faces = ['300 1em "DM Mono"', '400 1em "DM Mono"', '1em "Instrument Serif"', 'italic 1em "Instrument Serif"'];
+          var loads = faces.map(function (f) { return document.fonts.load(f).then(null, function () {}); });
+          loads[0].then(showDigits, showDigits);
+          Promise.all(loads)
+            .then(function () { return document.fonts.ready; })
+            .then(fontsSettled, fontsSettled);
+        }
+
+        // Milestone 1: the Google Fonts stylesheet has arrived and applied.
+        var fontsLink = document.getElementById('fonts-css');
+        if (!fontsLink) {
+          watchFonts();
+        } else if (fontsLink.sheet) {
+          watchFonts();
         } else {
-          raise(80);
+          // The preload fires load once when fetched and again when it becomes
+          // a stylesheet; .sheet is set on the second. frame() also polls it.
+          fontsLink.addEventListener('load', function () { if (fontsLink.sheet) { watchFonts(); } });
+          fontsLink.addEventListener('error', function () {
+            if (!sheetSeen) { sheetSeen = true; showDigits(); fontsSettled(); }
+          });
         }
 
         // Milestone 3: the window load event, every subresource accounted for.
-        function onLoaded() { loaded = true; raise(100); }
+        function onLoaded() { loaded = true; recompute(); }
         if (document.readyState === 'complete') { onLoaded(); }
         else { window.addEventListener('load', onLoaded); }
 
-        var stallTimer = window.setTimeout(onLoaded, STALL_MS);
+        var stallTimer = window.setTimeout(function () {
+          loaded = true; fontsDone = true; showDigits(); raise(100);
+        }, STALL_MS);
 
         function frame(now) {
+          if (!sheetSeen && fontsLink && fontsLink.sheet) { watchFonts(); }
           var dt = Math.min((now - last) / 1000, 0.1);
           last = now;
           var cap = 100 * (now - start) / MIN_MS;             // time floor
@@ -1067,7 +1120,7 @@
           if (next > shown) { shown = next; }
           count.textContent = String(Math.floor(shown));
           fill.style.transform = 'scaleX(' + (shown / 100) + ')';
-          if (shown >= 100 && loaded) {
+          if (shown >= 100 && loaded && fontsDone) {
             window.clearTimeout(stallTimer);
             finishLoader();
             return;
@@ -1219,11 +1272,16 @@
           renderer.render(scene, camera);
           rafId = window.requestAnimationFrame(frame);
         }
-        function start() { if (running) { return; } running = true; last = 0; rafId = window.requestAnimationFrame(frame); }
+        function start() {
+          // No frames under the opaque loader; finishLoader() calls resumeScene.
+          if (running || root.classList.contains('loading')) { return; }
+          running = true; last = 0; rafId = window.requestAnimationFrame(frame);
+        }
         function stop() { running = false; window.cancelAnimationFrame(rafId); }
 
         // Only animate while the hero is on screen and the tab is visible.
         var heroVisible = true;
+        resumeScene = function () { if (heroVisible && !document.hidden) { start(); } };
         if ('IntersectionObserver' in window) {
           new IntersectionObserver(function (entries) {
             heroVisible = entries[0].isIntersecting;
