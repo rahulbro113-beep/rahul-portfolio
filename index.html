@@ -312,7 +312,6 @@
       pointer-events: none;
       transition: opacity 1400ms var(--ease);
     }
-    @media (max-width: 600px) { .hero__scene { opacity: .75; } } /* quieter under the stacked headline */
     html.loading .hero__scene { opacity: 0; }
     .hero__scene canvas {
       display: block;
@@ -1406,149 +1405,213 @@
         } catch (e) { return false; }
       }
 
+      // Desk scene: the standalone desk-scene.html, scoped to the hero.
+      // Canvas is transparent so --paper shows through; the scroll zoom runs
+      // across the hero's own scroll range only. Below 900px the scene is
+      // dropped in favour of the static glow so the stacked headline stays clean.
+      var WIDE = '(min-width: 900px)';
+      var sceneInitialised = false;
+      var sceneApi = null;
+
       function initScene() {
         var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduce || sceneAbandoned || !window.THREE || !webglAvailable()) { sceneFallback(); return; }
+        if (!window.matchMedia(WIDE).matches) { sceneFallback(); return; } // wait for a wide viewport
+        if (sceneInitialised) { return; }
+        sceneInitialised = true;
 
         var canvas = document.getElementById('hero-canvas');
         var renderer;
         try {
-          renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+          renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
         } catch (e) { sceneFallback(); return; }
+        sceneHost.classList.remove('is-fallback'); // may have been set while the viewport was narrow
         function pixelRatio() { return Math.min(window.devicePixelRatio || 1, 2); }
         renderer.setPixelRatio(pixelRatio());
         renderer.setClearColor(0x000000, 0);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.outputEncoding = THREE.sRGBEncoding;
 
         var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-        var CAM_R = 16;
+        var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 200);
 
-        // Lights are neutral so the gold stays gold; r128 treats colours as
-        // linear under sRGB output, so the tokens are converted on the way in.
-        var sun = new THREE.DirectionalLight(new THREE.Color(0xF3F0EA).convertSRGBToLinear(), 0.9);
-        sun.position.set(5, 7, 9);
-        scene.add(sun);
-        scene.add(new THREE.AmbientLight(new THREE.Color(0xF3F0EA).convertSRGBToLinear(), 0.3));
+        // Palette, warmed to sit on paper rather than cool grey.
+        var ACCENT = 0x8E3B43;
+        var DESK = 0x433D3A, INK = 0x2B2628, SKIN = 0xE0A878, SHIRT = 0x4F5461, HAIR = 0x2E2A28;
+        var PLASTIC = 0xEBE5DB, CHAIR = 0xC9724A, PLANT = 0x7BA05B, METAL = 0x9C9894;
+        var KEYCAP = 0xD8D1C6, SCREEN = 0xF1ECE3, PAPERS = 0xFBF8F2, JEANS = 0x3F4759;
 
-        // Seeded, so the composition is identical on every visit.
-        var seed = 20240915;
-        function rand() {
-          seed = (seed + 0x6D2B79F5) | 0;
-          var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        // Lighting tuned for a light background.
+        scene.add(new THREE.HemisphereLight(0xffffff, 0xd9d3c8, 0.85));
+        var key = new THREE.DirectionalLight(0xffffff, 0.85);
+        key.position.set(6, 10, 7);
+        key.castShadow = true;
+        key.shadow.mapSize.set(2048, 2048);
+        key.shadow.camera.near = 1; key.shadow.camera.far = 40;
+        key.shadow.camera.left = -9; key.shadow.camera.right = 9;
+        key.shadow.camera.top = 9; key.shadow.camera.bottom = -9;
+        key.shadow.bias = -0.0006;
+        scene.add(key);
+        var fillLight = new THREE.DirectionalLight(0xffffff, 0.25);
+        fillLight.position.set(-7, 4, -4);
+        scene.add(fillLight);
+
+        // Shadow catcher so the scene rests on the page.
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShadowMaterial({ opacity: 0.14 }));
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+        function M(c, r, m) { return new THREE.MeshStandardMaterial({ color: c, roughness: r == null ? 0.85 : r, metalness: m || 0, flatShading: true }); }
+        function box(w, h, d, mat, x, y, z, parent) {
+          var mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+          mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true;
+          (parent || scene).add(mesh); return mesh;
         }
-        function range(a, b) { return a + (b - a) * rand(); }
-
-        // Ink for everything: on paper the pieces read as graphite line work.
-        var HAZE = 0x1B1A1C, GOLD = 0x1B1A1C;
-        // Started at 15 and read as busy; halved so the headline stays the subject.
-        var COUNT = 8;
-        var group = new THREE.Group();
-        var items = [];
-        var meanX = 0;
-        for (var i = 0; i < COUNT; i++) {
-          var isRing = i % 2 === 0;
-          // Three of eight are wireframe: one coarse ring (so the wire reads at
-          // this tube size) and two icosahedrons.
-          var wire = i === 0 || i === 1 || i === 5;
-          var geometry = isRing
-            ? new THREE.TorusGeometry(range(0.8, 1.9), range(0.02, 0.04), wire ? 4 : 10, wire ? 28 : 96)
-            : new THREE.IcosahedronGeometry(range(0.3, 0.8), 0);
-          var material = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(i % 3 === 1 ? GOLD : HAZE).convertSRGBToLinear(),
-            metalness: 0.15,
-            roughness: 0.85,
-            wireframe: wire,
-            transparent: true,
-            opacity: wire ? 0.5 : (isRing ? 0.42 : 0.32)
-          });
-          var mesh = new THREE.Mesh(geometry, material);
-          // Scattered in depth and biased to the right, away from the headline.
-          mesh.position.set(range(-2.5, 9), range(-3.5, 3.5), range(-12, -1));
-          meanX += mesh.position.x / COUNT;
-          mesh.rotation.set(range(0, Math.PI), range(0, Math.PI), range(0, Math.PI));
-          var axis = new THREE.Vector3(range(-1, 1), range(-1, 1), range(-1, 1));
-          if (axis.lengthSq() < 1e-6) { axis.set(0, 1, 0); }
-          axis.normalize();
-          items.push({ mesh: mesh, axis: axis, speed: range(0.03, 0.09) * (rand() < 0.5 ? -1 : 1) });
-          group.add(mesh);
+        function cyl(rt, rb, h, seg, mat, x, y, z, parent) {
+          var mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+          mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true;
+          (parent || scene).add(mesh); return mesh;
         }
-        scene.add(group);
 
-        // Camera: at most 4 degrees of drift toward the cursor, heavily eased.
-        // Touch devices have no cursor to follow, so the drift is autonomous.
-        var MAX = THREE.MathUtils.degToRad(4);
-        var touch = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches;
-        var targetYaw = 0, targetPitch = 0, yaw = 0, pitch = 0;
-        // Keep the combined yaw and pitch inside the 4 degree budget, corners included.
-        function setTarget(y, p) {
-          var m = Math.sqrt(y * y + p * p);
-          if (m > MAX) { y *= MAX / m; p *= MAX / m; }
-          targetYaw = y;
-          targetPitch = p;
+        var rig = new THREE.Group(); scene.add(rig);
+
+        // Desk
+        var deskMat = M(DESK, 0.7), legMat = M(METAL, 0.5, 0.35);
+        box(7.2, 0.16, 3.0, deskMat, 0, 2.05, 0, rig);
+        [[-3.3, -1.2], [3.3, -1.2], [-3.3, 1.2], [3.3, 1.2]].forEach(function (p) { cyl(0.07, 0.07, 2.05, 8, legMat, p[0], 1.02, p[1], rig); });
+        box(6.4, 0.7, 0.08, M(DESK, 0.8), 0, 1.6, -1.35, rig);            // modesty panel
+        box(1.5, 1.3, 1.3, M(DESK, 0.75), -2.5, 1.3, 0.1, rig);            // drawer unit
+        box(1.45, 0.05, 0.06, M(METAL, 0.5, 0.4), -2.5, 1.55, 0.78, rig);
+        box(1.45, 0.05, 0.06, M(METAL, 0.5, 0.4), -2.5, 1.05, 0.78, rig);
+
+        // CRT monitor
+        var mon = new THREE.Group(); mon.position.set(0.55, 2.13, -0.75); rig.add(mon);
+        box(1.9, 1.55, 1.5, M(PLASTIC, 0.75), 0, 0.9, 0, mon);             // body
+        box(1.72, 1.34, 0.08, M(0x2E2A2C, 0.5), 0, 0.93, 0.76, mon);       // bezel
+        var screen = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.14), new THREE.MeshBasicMaterial({ color: SCREEN }));
+        screen.position.set(0, 0.93, 0.81); mon.add(screen);
+        var lineMat = new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.32 });
+        [[0.9, 1.25], [0.62, 0.95], [0.66, 0.72], [0.5, 0.5], [0.78, 0.28]].forEach(function (l) {
+          var ln = new THREE.Mesh(new THREE.PlaneGeometry(l[0], 0.045), lineMat);
+          ln.position.set(-0.75 + l[0] / 2, 0.4 + l[1] * 0.5, 0.82); mon.add(ln);
+        });
+        box(1.0, 0.16, 0.9, M(PLASTIC, 0.75), 0, 0.08, 0.1, mon);           // stand
+
+        // Keyboard, mouse, mug, papers
+        var kb = box(2.1, 0.08, 0.75, M(PLASTIC, 0.8), 0.35, 2.17, 0.85, rig); kb.rotation.y = -0.05;
+        var keyMat = M(KEYCAP, 0.9);
+        for (var r = 0; r < 4; r++) for (var c = 0; c < 13; c++) { box(0.11, 0.03, 0.11, keyMat, -0.55 + c * 0.145, 2.23, 0.62 + r * 0.14, rig); }
+        box(0.3, 0.09, 0.45, M(PLASTIC, 0.7), 1.85, 2.17, 0.85, rig);       // mouse
+        var mugMat = M(0xFFFDF8, 0.6);
+        cyl(0.2, 0.18, 0.34, 10, mugMat, 2.35, 2.3, 0.1, rig);              // mug
+        var mugH = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.028, 6, 12), mugMat);
+        mugH.position.set(2.56, 2.3, 0.1); mugH.rotation.y = Math.PI / 2; mugH.castShadow = true; rig.add(mugH);
+        var paperMat = M(PAPERS, 0.95);
+        for (var i = 0; i < 4; i++) { box(0.85, 0.02, 0.6, paperMat, -1.75 + i * 0.012, 2.15 + i * 0.022, 0.75, rig); }
+
+        // Plant
+        cyl(0.3, 0.24, 0.5, 8, M(0xB8734A, 0.85), 3.05, 2.38, -0.7, rig);
+        var leafMat = M(PLANT, 0.9);
+        for (var j = 0; j < 7; j++) {
+          var leaf = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.95, 5), leafMat);
+          var a = (j / 7) * Math.PI * 2;
+          leaf.position.set(3.05 + Math.cos(a) * 0.2, 3.1, -0.7 + Math.sin(a) * 0.2);
+          leaf.rotation.set(Math.cos(a) * 0.55, 0, Math.sin(a) * -0.55);
+          leaf.castShadow = true; rig.add(leaf);
         }
-        if (!touch) {
-          window.addEventListener('pointermove', function (e) {
-            // Both axes follow the cursor: right moves the camera right, down moves it down.
-            setTarget(
-              (e.clientX / window.innerWidth * 2 - 1) * MAX,
-              (1 - e.clientY / window.innerHeight * 2) * MAX * 0.6
-            );
-          }, { passive: true });
+
+        // Chair
+        var chair = new THREE.Group(); chair.position.set(0.3, 0, 1.72); rig.add(chair);
+        var chMat = M(CHAIR, 0.9);
+        box(1.25, 0.22, 1.15, chMat, 0, 1.32, 0, chair);                    // seat
+        var back = box(1.12, 1.05, 0.18, chMat, 0, 1.95, 0.5, chair); back.rotation.x = 0.13;
+        box(0.12, 0.5, 0.7, chMat, -0.66, 1.65, -0.05, chair);              // arms
+        box(0.12, 0.5, 0.7, chMat, 0.66, 1.65, -0.05, chair);
+        cyl(0.11, 0.11, 1.0, 8, M(METAL, 0.4, 0.5), 0, 0.75, 0, chair);     // stem
+        var baseMat = M(DESK, 0.7), casterMat = M(INK, 0.7);
+        for (var k = 0; k < 5; k++) {
+          var ca = (k / 5) * Math.PI * 2;
+          var arm = box(0.14, 0.09, 0.72, baseMat, Math.cos(ca) * 0.32, 0.28, Math.sin(ca) * 0.32, chair);
+          arm.rotation.y = -ca;
+          cyl(0.1, 0.1, 0.09, 8, casterMat, Math.cos(ca) * 0.62, 0.12, Math.sin(ca) * 0.62, chair).rotation.x = Math.PI / 2;
+        }
+
+        // Seated figure
+        var person = new THREE.Group(); person.position.set(0.3, 0, 1.62); rig.add(person);
+        var skin = M(SKIN, 0.9), shirt = M(SHIRT, 0.95), hair = M(HAIR, 0.95), jeans = M(JEANS, 0.95), shoe = M(INK, 0.8);
+        box(0.92, 1.05, 0.58, shirt, 0, 2.0, 0.1, person);                  // torso
+        box(0.6, 0.16, 0.5, shirt, 0, 2.5, 0.1, person);                    // shoulders
+        box(0.5, 0.55, 0.48, skin, 0, 2.88, 0.02, person);                  // head
+        box(0.54, 0.22, 0.52, hair, 0, 3.1, 0.02, person);                  // hair top
+        box(0.54, 0.3, 0.12, hair, 0, 2.95, 0.22, person);                  // hair back
+        box(0.16, 0.3, 0.16, skin, 0, 2.58, 0.04, person);                  // neck
+        [-1, 1].forEach(function (s) {
+          var up = box(0.24, 0.6, 0.24, shirt, s * 0.54, 2.14, 0.02, person); up.rotation.x = -0.3;
+          var fore = box(0.21, 0.56, 0.21, skin, s * 0.52, 1.95, -0.3, person); fore.rotation.x = -1.32;
+          box(0.22, 0.09, 0.28, skin, s * 0.5, 1.8, -0.6, person);           // hand
+        });
+        [-1, 1].forEach(function (s) {
+          box(0.34, 0.3, 1.0, jeans, s * 0.28, 1.48, -0.34, person);
+          box(0.28, 0.95, 0.3, jeans, s * 0.28, 0.95, -0.78, person);
+          box(0.3, 0.16, 0.5, shoe, s * 0.28, 0.5, -0.92, person);          // shoe
+        });
+
+        // Scroll-driven zoom: t = 0 far and small while the headline is fully
+        // visible, t = 1 at the closest point once the hero has scrolled out.
+        var FAR = { pos: new THREE.Vector3(13.5, 6.6, 9.0), look: new THREE.Vector3(0.2, 2.3, 0.4), fov: 32 };
+        var NEAR = { pos: new THREE.Vector3(8.6, 5.0, 5.9), look: new THREE.Vector3(0.3, 2.45, 0.5), fov: 30 };
+        var tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3(), right = new THREE.Vector3();
+        var lateral = 0; // world-units shift along the camera's right axis; keeps the desk right of the headline
+        function setZoom(t) {
+          var e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          tmpP.lerpVectors(FAR.pos, NEAR.pos, e);
+          tmpL.lerpVectors(FAR.look, NEAR.look, e);
+          camera.position.copy(tmpP);
+          camera.fov = FAR.fov + (NEAR.fov - FAR.fov) * e;
+          camera.updateProjectionMatrix();
+          camera.lookAt(tmpL);
+          // Slide camera and target together so the scene sits to the right of the text.
+          right.setFromMatrixColumn(camera.matrixWorld, 0).normalize().multiplyScalar(lateral);
+          camera.position.sub(right);
+          tmpL.sub(right);
+          camera.lookAt(tmpL);
+        }
+        function heroProgress() {
+          var rect = heroEl.getBoundingClientRect();
+          return rect.height > 0 ? Math.min(1, Math.max(0, -rect.top / rect.height)) : 0;
         }
 
         function resize() {
           var w = heroEl.clientWidth, h = heroEl.clientHeight;
           if (!w || !h) { return; }
-          renderer.setPixelRatio(pixelRatio()); // zoom or a monitor change alters the DPR
+          renderer.setPixelRatio(pixelRatio());
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
-          camera.updateProjectionMatrix();
-          // Portrait viewports are too narrow for the right-hand bias, so centre the cluster.
-          group.position.x = camera.aspect < 1 ? -meanX + 1.2 : 0;
+          // Wider viewports get more lateral room; keep the desk clear of a 12ch headline.
+          lateral = Math.min(4.4, Math.max(2.6, 3.0 + (1.6 - camera.aspect) * 2));
+          setZoom(current);
         }
+        var target = 0, current = 0;
         resize();
         if ('ResizeObserver' in window) { new ResizeObserver(resize).observe(heroEl); }
         window.addEventListener('resize', resize);
 
-        // Compile shaders and upload buffers now, under the loader, so the
-        // first visible frame is not the expensive one.
+        // Compile and upload now, under the loader, so the first visible frame is cheap.
         renderer.compile(scene, camera);
         renderer.render(scene, camera);
 
-        var running = false, rafId = 0, last = 0, clock = 0, dead = false;
-        function frame(now) {
+        var running = false, rafId = 0, dead = false;
+        function frame() {
           if (!running) { return; }
-          var dt = last ? Math.min((now - last) / 1000, 0.05) : 0.016;
-          last = now;
-          clock += dt;
-          for (var k = 0; k < items.length; k++) {
-            items[k].mesh.rotateOnAxis(items[k].axis, items[k].speed * dt);
-          }
-          group.rotation.y += 0.008 * dt;
-          group.position.y = Math.sin(clock * 0.18) * 0.15;
-          if (touch) {
-            setTarget(Math.sin(clock * 0.13) * MAX, Math.sin(clock * 0.09 + 1.3) * MAX * 0.6);
-          }
-          var ease = 1 - Math.exp(-dt * 1.6);
-          yaw += (targetYaw - yaw) * ease;
-          pitch += (targetPitch - pitch) * ease;
-          camera.position.set(
-            CAM_R * Math.sin(yaw) * Math.cos(pitch),
-            CAM_R * Math.sin(pitch),
-            CAM_R * Math.cos(yaw) * Math.cos(pitch)
-          );
-          camera.lookAt(0, 0, 0);
+          target = heroProgress();
+          current += (target - current) * 0.08;
+          setZoom(current);
           renderer.render(scene, camera);
           rafId = window.requestAnimationFrame(frame);
         }
         function start() {
-          // No frames under the opaque loader (finishLoader() calls resumeScene),
-          // and none once the GL context is lost and the glow has taken over.
           if (dead || running || root.classList.contains('loading')) { return; }
-          running = true; last = 0; rafId = window.requestAnimationFrame(frame);
+          running = true; rafId = window.requestAnimationFrame(frame);
         }
         function stop() { running = false; window.cancelAnimationFrame(rafId); }
 
@@ -1574,12 +1637,28 @@
           sceneFallback();
         });
         canvas.addEventListener('webglcontextrestored', function () {
-          // Three.js rebuilds its GL state on restore; hand the hero back to the scene.
           dead = false;
           sceneHost.classList.remove('is-fallback');
           resize();
           if (heroVisible && !document.hidden) { start(); }
         });
+
+        sceneApi = {
+          hide: function () { stop(); sceneFallback(); },
+          show: function () { if (dead) { return; } sceneHost.classList.remove('is-fallback'); resize(); resumeScene(); }
+        };
+      }
+
+      // Crossing 900px: drop the scene on narrow viewports, bring it back (or
+      // build it for the first time) when the viewport is wide enough.
+      if (window.matchMedia) {
+        var wideQuery = window.matchMedia(WIDE);
+        var onWide = function () {
+          if (wideQuery.matches) { if (sceneInitialised) { sceneApi && sceneApi.show(); } else { initScene(); } }
+          else if (sceneApi) { sceneApi.hide(); }
+        };
+        if (wideQuery.addEventListener) { wideQuery.addEventListener('change', onWide); }
+        else if (wideQuery.addListener) { wideQuery.addListener(onWide); }
       }
 
       // Three.js is deferred, so it has run by DOMContentLoaded (or failed to).
