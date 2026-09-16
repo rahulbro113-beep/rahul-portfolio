@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html,body{margin:0;background:#F2F1ED}
+body{height:300vh}
+  #c{display:block;width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:0}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const PAPER=0xF2F1ED, INK=0x2A2B2E, ACCENT=0x2B3FD4;
+const DESK=0x3A3B3E, WOOD=0xD8D4CC, SKIN=0xE0A878, SHIRT=0x4A5568, HAIR=0x2E2A28;
+const PLASTIC=0xE8E6E1, CHAIR=0xC9724A, PLANT=0x7BA05B, METAL=0x9A9A9E;
+
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(35,innerWidth/innerHeight,0.1,200);
+
+// ---------- lighting tuned for a light background ----------
+scene.add(new THREE.HemisphereLight(0xffffff,0xd8d5cd,0.85));
+const key=new THREE.DirectionalLight(0xffffff,0.85);
+key.position.set(6,10,7);
+key.castShadow=true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.near=1; key.shadow.camera.far=40;
+key.shadow.camera.left=-9; key.shadow.camera.right=9;
+key.shadow.camera.top=9; key.shadow.camera.bottom=-9;
+key.shadow.bias=-0.0006;
+scene.add(key);
+const fill=new THREE.DirectionalLight(0xffffff,0.25); fill.position.set(-7,4,-4); scene.add(fill);
+
+// shadow catcher so the scene rests on the page
+const ground=new THREE.Mesh(
+  new THREE.PlaneGeometry(60,60),
+  new THREE.ShadowMaterial({opacity:0.16})
+);
+ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+
+const M=(c,r=0.85,m=0.0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m,flatShading:true});
+function box(w,h,d,mat,x,y,z,parent){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+  m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true;
+  (parent||scene).add(m); return m;
+}
+function cyl(rt,rb,h,seg,mat,x,y,z,parent){
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),mat);
+  m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true;
+  (parent||scene).add(m); return m;
+}
+
+const rig=new THREE.Group(); scene.add(rig);
+
+// ---------- desk ----------
+const deskMat=M(DESK,0.7), legMat=M(METAL,0.5,0.35);
+box(7.2,0.16,3.0,deskMat,0,2.05,0,rig);
+[[-3.3,-1.2],[3.3,-1.2],[-3.3,1.2],[3.3,1.2]].forEach(([x,z])=>cyl(0.07,0.07,2.05,8,legMat,x,1.02,z,rig));
+// modesty panel
+box(6.4,0.7,0.08,M(DESK,0.8),0,1.6,-1.35,rig);
+// drawer unit
+box(1.5,1.3,1.3,M(DESK,0.75),-2.5,1.3,0.1,rig);
+box(1.45,0.05,0.06,M(METAL,0.5,0.4),-2.5,1.55,0.78,rig);
+box(1.45,0.05,0.06,M(METAL,0.5,0.4),-2.5,1.05,0.78,rig);
+
+// ---------- CRT monitor ----------
+const mon=new THREE.Group(); mon.position.set(0.55,2.13,-0.75); rig.add(mon);
+box(1.9,1.55,1.5,M(PLASTIC,0.75),0,0.9,0,mon);              // body
+box(1.72,1.34,0.08,M(0x2A2E33,0.5),0,0.93,0.76,mon);        // bezel
+const screen=new THREE.Mesh(
+  new THREE.PlaneGeometry(1.5,1.14),
+  new THREE.MeshBasicMaterial({color:0xDCE8F2})
+);
+screen.position.set(0,0.93,0.81); mon.add(screen);
+const lineMat=new THREE.MeshBasicMaterial({color:ACCENT,transparent:true,opacity:0.32});
+[[0.9,1.25],[0.62,0.95],[0.66,0.72],[0.5,0.5],[0.78,0.28]].forEach(([w,y],i)=>{
+  const ln=new THREE.Mesh(new THREE.PlaneGeometry(w,0.045),lineMat);
+  ln.position.set(-0.75+w/2,0.4+y*0.5,0.82); mon.add(ln);
+});
+box(1.0,0.16,0.9,M(PLASTIC,0.75),0,0.08,0.1,mon);           // stand
+
+// ---------- keyboard, mouse, mug, papers ----------
+const kb=box(2.1,0.08,0.75,M(PLASTIC,0.8),0.35,2.17,0.85,rig); kb.rotation.y=-0.05;
+for(let r=0;r<4;r++)for(let c=0;c<13;c++){
+  box(0.11,0.03,0.11,M(0xD2CFC9,0.9),-0.55+c*0.145,2.23,0.62+r*0.14,rig);
+}
+box(0.3,0.09,0.45,M(PLASTIC,0.7),1.85,2.17,0.85,rig);        // mouse
+cyl(0.2,0.18,0.34,10,M(0xFFFFFF,0.6),2.35,2.3,0.1,rig);      // mug
+const mugH=new THREE.Mesh(new THREE.TorusGeometry(0.11,0.028,6,12),M(0xFFFFFF,0.6));
+mugH.position.set(2.56,2.3,0.1); mugH.rotation.y=Math.PI/2; mugH.castShadow=true; rig.add(mugH);
+for(let i=0;i<4;i++) box(0.85,0.02,0.6,M(0xFAF8F4,0.95),-1.75+i*0.012,2.15+i*0.022,0.75,rig);
+
+// ---------- plant ----------
+const pot=cyl(0.3,0.24,0.5,8,M(0xB8734A,0.85),3.05,2.38,-0.7,rig);
+for(let i=0;i<7;i++){
+  const leaf=new THREE.Mesh(new THREE.ConeGeometry(0.16,0.95,5),M(PLANT,0.9));
+  const a=(i/7)*Math.PI*2;
+  leaf.position.set(3.05+Math.cos(a)*0.2,3.1,-0.7+Math.sin(a)*0.2);
+  leaf.rotation.set(Math.cos(a)*0.55,0,Math.sin(a)*-0.55);
+  leaf.castShadow=true; rig.add(leaf);
+}
+
+// ---------- chair ----------
+const chair=new THREE.Group(); chair.position.set(0.3,0,1.72); rig.add(chair);
+const chMat=M(CHAIR,0.9);
+box(1.25,0.22,1.15,chMat,0,1.32,0,chair);                    // seat
+const back=box(1.12,1.05,0.18,chMat,0,1.95,0.5,chair); back.rotation.x=0.13;
+box(0.12,0.5,0.7,chMat,-0.66,1.65,-0.05,chair);              // arms
+box(0.12,0.5,0.7,chMat,0.66,1.65,-0.05,chair);
+cyl(0.11,0.11,1.0,8,M(METAL,0.4,0.5),0,0.75,0,chair);        // stem
+for(let i=0;i<5;i++){
+  const a=(i/5)*Math.PI*2;
+  const arm=box(0.14,0.09,0.72,M(0x3A3B3E,0.7),Math.cos(a)*0.32,0.28,Math.sin(a)*0.32,chair);
+  arm.rotation.y=-a;
+  cyl(0.1,0.1,0.09,8,M(0x2A2B2E,0.7),Math.cos(a)*0.62,0.12,Math.sin(a)*0.62,chair).rotation.x=Math.PI/2;
+}
+
+// ---------- seated figure ----------
+const person=new THREE.Group(); person.position.set(0.3,0,1.62); rig.add(person);
+const skin=M(SKIN,0.9), shirt=M(SHIRT,0.95), hair=M(HAIR,0.95), jeans=M(0x3C4A63,0.95);
+
+box(0.92,1.05,0.58,shirt,0,2.0,0.1,person);                   // torso
+box(0.6,0.16,0.5,shirt,0,2.5,0.1,person);                     // shoulders
+const head=box(0.5,0.55,0.48,skin,0,2.88,0.02,person);        // head
+box(0.54,0.22,0.52,hair,0,3.1,0.02,person);                   // hair top
+box(0.54,0.3,0.12,hair,0,2.95,0.22,person);                   // hair back
+box(0.16,0.3,0.16,skin,0,2.58,0.04,person);                   // neck
+
+// upper arms angled forward, forearms reaching the keyboard
+[-1,1].forEach(s=>{
+  const up=box(0.24,0.6,0.24,shirt,s*0.54,2.14,0.02,person); up.rotation.x=-0.3;
+  const fore=box(0.21,0.56,0.21,skin,s*0.52,1.95,-0.3,person);
+  fore.rotation.x=-1.32;
+  box(0.22,0.09,0.28,skin,s*0.5,1.8,-0.6,person);             // hand
+});
+// thighs forward, shins down
+[-1,1].forEach(s=>{
+  box(0.34,0.3,1.0,jeans,s*0.28,1.48,-0.34,person);
+  box(0.28,0.95,0.3,jeans,s*0.28,0.95,-0.78,person);
+  box(0.3,0.16,0.5,M(0x2A2B2E,0.8),s*0.28,0.5,-0.92,person);  // shoe
+});
+
+// ---------- scroll-driven zoom ----------
+// t = 0 -> far and small, t = 1 -> close and large
+const FAR={pos:new THREE.Vector3(13.5,6.6,9.0), look:new THREE.Vector3(0.2,2.3,0.4), fov:32};
+const NEAR={pos:new THREE.Vector3(8.6,5.0,5.9), look:new THREE.Vector3(0.3,2.45,0.5), fov:30};
+const tmpP=new THREE.Vector3(), tmpL=new THREE.Vector3();
+function setZoom(t){
+  const e=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  tmpP.lerpVectors(FAR.pos,NEAR.pos,e);
+  tmpL.lerpVectors(FAR.look,NEAR.look,e);
+  camera.position.copy(tmpP);
+  camera.fov=FAR.fov+(NEAR.fov-FAR.fov)*e;
+  camera.updateProjectionMatrix();
+  camera.lookAt(tmpL);
+}
+window.setZoom=setZoom;
+setZoom(0);
+
+// scroll drives the zoom; page is 300vh so there is room to scroll
+let target=0,current=0;
+addEventListener('scroll',()=>{
+  const max=document.body.scrollHeight-innerHeight;
+  target=max>0?Math.min(1,scrollY/max):0;
+},{passive:true});
+(function ease(){ current+=(target-current)*0.08; setZoom(current); requestAnimationFrame(ease); })();
+
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+function loop(){ renderer.render(scene,camera); requestAnimationFrame(loop); }
+loop();
+window.__ready=true;
+</script>
+</body>
+</html>
