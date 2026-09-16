@@ -327,7 +327,8 @@
       letter-spacing: .02em;
       color: var(--muted);
     }
-    .hero__avail .locale__dot { background: var(--accent); }
+    .hero__avail { align-items: flex-start; }
+    .hero__avail .locale__dot { background: var(--accent); margin-top: .5em; } /* sits on the first line when the text wraps */
     html.loading .hero__avail { opacity: 0; }
     html.revealed .hero__avail { animation: hero-in 900ms var(--ease) both; animation-delay: 720ms; }
     @media (max-width: 999px) { .hero__avail { max-width: none; } }
