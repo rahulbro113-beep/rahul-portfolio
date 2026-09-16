@@ -5,25 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Rahul — Customer onboarding, adoption, enterprise relationships</title>
   <meta name="description" content="Rahul owns what happens after the signature: customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
-  <meta name="theme-color" content="#0A0C18">
+  <meta name="theme-color" content="#241F22">
 
-  <!-- Social cards. TODO: replace the domain below with the live one once Vercel assigns it. -->
+  <!-- Social cards -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Rahul">
   <meta property="og:title" content="Rahul — I own what happens after the signature.">
   <meta property="og:description" content="Customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
-  <meta property="og:url" content="https://rahul-portfolio.vercel.app/">
-  <meta property="og:image" content="https://rahul-portfolio.vercel.app/og.png">
+  <meta property="og:url" content="https://rahul-portfolio-one-beta.vercel.app/">
+  <meta property="og:image" content="https://rahul-portfolio-one-beta.vercel.app/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="I own what happens after the signature. Rahul, customer onboarding, adoption and enterprise relationships.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Rahul — I own what happens after the signature.">
   <meta name="twitter:description" content="Customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
-  <meta name="twitter:image" content="https://rahul-portfolio.vercel.app/og.png">
+  <meta name="twitter:image" content="https://rahul-portfolio-one-beta.vercel.app/og.png">
 
   <!-- Favicon: inline SVG (gold dot on void), plus a PNG for iOS home screens. -->
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A0C18'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23E3B778'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23241F22'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23F1EFE9'/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
   <script>
@@ -49,15 +49,15 @@
        Tokens
        ------------------------------------------------------------------ */
     :root {
-      --void: #0A0C18;                    /* page background */
-      --panel: #12162B;                   /* raised sections */
-      --bone: #F3F0EA;                    /* primary text */
-      --gold: #E3B778;                    /* single accent, used sparingly */
-      --haze: #8A93E0;                    /* secondary accent, 3D and hover states only */
-      --rule: rgba(243, 240, 234, .16);   /* hairlines */
+      --paper: #F1EFE9;                   /* page background */
+      --panel: #E2DFD6;                   /* raised sections: intro, index, cards */
+      --band: #241F22;                    /* About section only */
+      --ink: #1B1A1C;                     /* primary text */
+      --muted: rgba(27, 26, 28, .64);     /* secondary text; .6 failed AA on --panel (4.12:1) */
+      --rule: rgba(27, 26, 28, .15);      /* hairlines */
+      --accent: #8E3B43;                  /* hover states and the Let's talk pill only */
 
-      --bone-70: rgba(243, 240, 234, .70);
-      --bone-50: rgba(243, 240, 234, .50);
+      --space: clamp(3.25rem, 6.5vw, 5.5rem); /* vertical rhythm between sections */
 
       --display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
       --mono: "DM Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
@@ -67,7 +67,7 @@
       --ease: cubic-bezier(.22, 1, .36, 1);
       --t: 420ms;
 
-      color-scheme: dark;
+      color-scheme: light;
     }
 
     /* ------------------------------------------------------------------
@@ -76,7 +76,7 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     html {
-      background: var(--void);
+      background: var(--paper);
       overflow-x: clip;
       scroll-behavior: smooth;
       -webkit-text-size-adjust: 100%;
@@ -86,8 +86,8 @@
       margin: 0;
       min-width: 0;
       overflow-x: clip;
-      background: var(--void);
-      color: var(--bone);
+      background: var(--paper);
+      color: var(--ink);
       font-family: var(--mono);
       font-size: clamp(.9rem, .85rem + .25vw, 1.02rem);
       font-weight: 400;
@@ -104,12 +104,12 @@
 
     :focus { outline: none; }
     :focus-visible {
-      outline: 2px solid var(--gold);
+      outline: 2px solid var(--ink);
       outline-offset: 4px;
       border-radius: 2px;
     }
 
-    ::selection { background: var(--gold); color: var(--void); }
+    ::selection { background: var(--ink); color: var(--paper); }
 
     .visually-hidden {
       position: absolute !important;
@@ -124,8 +124,8 @@
       top: .75rem; left: .75rem;
       z-index: 100;
       padding: .5rem .9rem;
-      background: var(--bone);
-      color: var(--void);
+      background: var(--ink);
+      color: var(--paper);
       font-size: .8rem;
       transform: translateY(-200%);
     }
@@ -142,7 +142,7 @@
       font-size: .72rem;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: var(--bone-50);
+      color: var(--muted);
     }
 
     .wrap { padding-inline: var(--gutter); }
@@ -157,7 +157,7 @@
       inset: 0 0 auto 0;
       z-index: 50;
       padding-top: env(safe-area-inset-top, 0px);
-      background: rgba(10, 12, 24, .82);
+      background: rgba(241, 239, 233, .85);
       -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--rule);
@@ -186,7 +186,7 @@
       white-space: nowrap;
     }
     .brand__role {
-      color: var(--bone-50);
+      color: var(--muted);
       font-size: .68rem;
       letter-spacing: .04em;
       white-space: nowrap;
@@ -199,23 +199,23 @@
       display: inline-flex;
       align-items: center;
       gap: .6rem;
-      color: var(--bone-70);
+      color: var(--muted);
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
     .locale__dot {
       width: .4rem; height: .4rem;
       border-radius: 50%;
-      background: var(--gold);
+      background: var(--ink);
       flex: none;
     }
-    .locale time { color: var(--bone); }
+    .locale time { color: var(--ink); }
 
     .nav { display: flex; gap: clamp(.9rem, 2vw, 1.75rem); }
     .nav a {
       position: relative;
       padding: .35rem 0;
-      color: var(--bone-70);
+      color: var(--muted);
       letter-spacing: .06em;
       text-transform: uppercase;
       transition: color var(--t) var(--ease);
@@ -225,12 +225,12 @@
       position: absolute;
       left: 0; right: 0; bottom: 0;
       height: 1px;
-      background: var(--haze);
+      background: var(--accent);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform var(--t) var(--ease);
     }
-    .nav a:hover { color: var(--bone); }
+    .nav a:hover { color: var(--ink); }
     .nav a:hover::after { transform: scaleX(1); }
 
     /* Sound toggle: same voice as the nav, state in brackets. */
@@ -241,7 +241,7 @@
       padding: .35rem 0;
       border: 0;
       background: none;
-      color: var(--bone-70);
+      color: var(--muted);
       font: inherit;
       letter-spacing: .06em;
       text-transform: uppercase;
@@ -254,15 +254,15 @@
       position: absolute;
       left: 0; right: 0; bottom: 0;
       height: 1px;
-      background: var(--haze);
+      background: var(--accent);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform var(--t) var(--ease);
     }
-    .sound:hover { color: var(--bone); }
+    .sound:hover { color: var(--ink); }
     .sound:hover::after { transform: scaleX(1); }
     .sound__state { font-variant-numeric: tabular-nums; }
-    .sound[aria-pressed="true"] .sound__state { color: var(--gold); }
+    .sound[aria-pressed="true"] .sound__state { color: var(--ink); }
 
     /* Floating pill */
     .talk {
@@ -275,20 +275,20 @@
       gap: .6rem;
       padding: .8rem 1.25rem;
       border-radius: 999px;
-      background: var(--bone);
-      color: var(--void);
+      background: var(--accent);
+      color: var(--paper);
       font-size: .78rem;
       letter-spacing: .06em;
       text-transform: uppercase;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      box-shadow: 0 10px 30px rgba(27, 26, 28, .18);
       transition: background var(--t) var(--ease), color var(--t) var(--ease), transform var(--t) var(--ease);
     }
     .talk__dot {
       width: .45rem; height: .45rem;
       border-radius: 50%;
-      background: var(--gold);
+      background: var(--paper);
     }
-    .talk:hover { background: var(--haze); color: var(--void); transform: translateY(-2px); }
+    .talk:hover { background: var(--ink); color: var(--paper); transform: translateY(-2px); }
     .talk:focus-visible { outline-offset: 3px; }
 
     /* ------------------------------------------------------------------
@@ -324,8 +324,8 @@
     .hero__scene.is-fallback,
     html:not(.js) .hero__scene {
       background:
-        radial-gradient(55% 45% at 72% 42%, rgba(138, 147, 224, .16), transparent 70%),
-        radial-gradient(38% 38% at 28% 72%, rgba(227, 183, 120, .09), transparent 70%);
+        radial-gradient(55% 45% at 72% 42%, rgba(27, 26, 28, .07), transparent 70%),
+        radial-gradient(38% 38% at 28% 72%, rgba(27, 26, 28, .04), transparent 70%);
     }
     .hero h1 {
       position: relative;
@@ -337,7 +337,7 @@
     }
     .hero h1 em {
       font-style: italic;
-      color: var(--gold);
+      color: var(--ink);
     }
     /* Each word is wrapped so the headline can stagger in behind the loader. */
     .hero__w { display: inline-block; }
@@ -363,8 +363,8 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: var(--void);
-      color: var(--bone);
+      background: var(--paper);
+      color: var(--ink);
       padding: var(--gutter);
       padding-bottom: calc(var(--gutter) + env(safe-area-inset-bottom, 0px));
       flex-direction: column;
@@ -404,7 +404,7 @@
     .loader__fill {
       position: absolute;
       inset: 0;
-      background: var(--bone);
+      background: var(--ink);
       transform: scaleX(0);
       transform-origin: left center;
       will-change: transform;
@@ -413,12 +413,57 @@
     /* ------------------------------------------------------------------
        Wordmark wall (static for now; animated in a later phase)
        ------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------
+       Intro: portrait beside a short statement of the job
+       ------------------------------------------------------------------ */
+    .intro {
+      background: var(--panel);
+      border-top: 1px solid var(--rule);
+      padding-block: var(--space);
+    }
+    .intro__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+      gap: 2rem clamp(2rem, 6vw, 6rem);
+      align-items: start;
+    }
+    .intro__img {
+      display: block;
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border: 1px solid var(--rule);
+      border-radius: 0;
+      box-shadow: none;
+      background: var(--paper);
+    }
+    .intro h2 {
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      max-width: 16ch;
+      text-wrap: balance;
+    }
+    .intro__prose {
+      margin-top: 1.5rem;
+      max-width: 62ch;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+    .intro__prose p + p { margin-top: 1.25em; }
+    .intro__prose p:first-child {
+      color: var(--ink);
+      font-family: var(--display);
+      font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+      line-height: 1.25;
+      letter-spacing: -.01em;
+    }
+
     .wall {
       overflow: hidden;
       background: var(--panel);
       border-top: 1px solid var(--rule);
       border-bottom: 1px solid var(--rule);
-      padding-block: clamp(1.5rem, 4vw, 3.5rem);
+      padding-block: var(--space);
     }
     .wall__head {
       display: flex;
@@ -446,8 +491,8 @@
       min-width: 0;
       overflow: hidden;
       text-overflow: clip;
-      color: var(--bone);
-      background-image: linear-gradient(var(--gold), var(--gold));
+      color: var(--ink);
+      background-image: linear-gradient(var(--accent), var(--accent));
       background-repeat: no-repeat;
       background-position: left center;
       background-size: 0% 100%;
@@ -461,7 +506,7 @@
       font-size: .72rem;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: var(--bone-70);
+      color: var(--muted);
       opacity: 0;
       transform: translateX(1.5rem);
       transition: opacity var(--t) var(--ease), transform var(--t) var(--ease);
@@ -489,7 +534,12 @@
       grid-template-columns: auto 1fr;
       align-items: end;
       gap: 1.5rem;
-      padding-block: clamp(3rem, 8vw, 7rem) clamp(1.5rem, 3vw, 2.5rem);
+      /* The section supplies the top padding; only the gap to the list lives here. */
+      padding-block: 0 clamp(1.5rem, 3vw, 2.5rem);
+    }
+    .work {
+      background: var(--panel);
+      padding-block: var(--space);
     }
     .section-head h2 {
       font-size: clamp(2.4rem, 6vw, 5.5rem);
@@ -514,7 +564,7 @@
       position: absolute;
       left: 0; right: 0; bottom: -1px;
       height: 1px;
-      background: var(--gold);
+      background: var(--accent);
       transform: scaleX(0);
       transform-origin: left center;
       transition: transform 300ms var(--ease);
@@ -548,9 +598,9 @@
       line-height: 1.05;
       transition: color var(--t) var(--ease);
     }
-    .row__summary { color: var(--bone-70); font-size: .9em; }
+    .row__summary { color: var(--muted); font-size: .9em; }
     .row__arrow {
-      color: var(--bone-50);
+      color: var(--muted);
       font-size: 1.2rem;
       transition: transform var(--t) var(--ease), color var(--t) var(--ease);
     }
@@ -564,7 +614,7 @@
       font-size: .68rem;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: var(--bone-70);
+      color: var(--muted);
       white-space: nowrap;
       transition: border-color var(--t) var(--ease), color var(--t) var(--ease);
     }
@@ -580,7 +630,7 @@
       display: block;
       overflow: hidden;
       min-height: 0;
-      color: var(--haze);
+      color: var(--accent);
       font-size: .8rem;
       letter-spacing: .02em;
     }
@@ -596,17 +646,17 @@
       margin-top: .85rem;
     }
     .row:hover .row__title,
-    .row:focus-visible .row__title { color: var(--haze); }
+    .row:focus-visible .row__title { color: var(--accent); }
     .row:hover .row__arrow,
-    .row:focus-visible .row__arrow { color: var(--haze); transform: translateX(.35rem); }
-    .row:hover .chip { border-color: var(--haze); color: var(--bone); }
+    .row:focus-visible .row__arrow { color: var(--accent); transform: translateX(.35rem); }
+    .row:hover .chip { border-color: var(--accent); color: var(--ink); }
     .row:focus-visible { outline-offset: 6px; }
 
     /* ------------------------------------------------------------------
        Case studies
        ------------------------------------------------------------------ */
     .case {
-      padding-block: clamp(4rem, 10vw, 9rem);
+      padding-block: var(--space);
       border-top: 1px solid var(--rule);
       scroll-margin-top: calc(var(--header-h) + 1rem);
     }
@@ -614,7 +664,7 @@
     .case__num {
       display: block;
       margin-bottom: 1.25rem;
-      color: var(--gold);
+      color: var(--muted);
     }
     .case__title {
       font-size: clamp(2.6rem, 7vw, 7rem);
@@ -653,37 +703,44 @@
     }
     .case__prose {
       max-width: 62ch;
-      color: var(--bone-70);
+      color: var(--muted);
       line-height: 1.75;
     }
+    .case__prose p + p { margin-top: 1.25em; }
 
     /* ------------------------------------------------------------------
-       About panel
+       About band: the one dark section. Rules and muted text are re-scoped
+       to paper so they stay visible on --band.
        ------------------------------------------------------------------ */
     .about {
-      background: var(--panel);
-      border-top: 1px solid var(--rule);
-      border-bottom: 1px solid var(--rule);
-      padding-block: clamp(4rem, 10vw, 9rem);
+      --rule: rgba(241, 239, 233, .18);
+      --muted: rgba(241, 239, 233, .68);
+      background: var(--band);
+      color: var(--paper);
+      padding-block: var(--space);
       scroll-margin-top: var(--header-h);
     }
     .about__statement {
-      font-size: clamp(1.9rem, 4.6vw, 4.6rem);
+      font-size: clamp(1.9rem, 4.2vw, 4.2rem);
       line-height: 1.12;
       letter-spacing: -.012em;
-      max-width: 22ch;
+      max-width: 24ch;
       text-wrap: pretty;
       margin-top: 1.25rem;
     }
-    .about__statement em {
-      font-style: italic;
-      color: var(--gold);
+    .about__prose {
+      margin-top: 2rem;
+      max-width: 62ch;
+      color: var(--muted);
+      line-height: 1.75;
     }
+    .about__prose p + p { margin-top: 1.25em; }
+    .about ::selection { background: var(--paper); color: var(--band); }
     .facts {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 2rem;
-      margin-top: clamp(3rem, 7vw, 6rem);
+      margin-top: clamp(2.5rem, 5vw, 4rem);
       padding-top: 1.5rem;
       border-top: 1px solid var(--rule);
     }
@@ -698,13 +755,13 @@
       overflow-wrap: anywhere;
     }
     .facts li:last-child { border-bottom: 0; }
-    .facts li span:last-child { color: var(--bone-50); font-size: .85em; white-space: nowrap; }
+    .facts li span:last-child { color: var(--muted); font-size: .85em; white-space: nowrap; }
 
     /* ------------------------------------------------------------------
        Contact
        ------------------------------------------------------------------ */
     .contact {
-      padding-block: clamp(5rem, 14vw, 12rem) clamp(3rem, 8vw, 6rem);
+      padding-block: var(--space);
       scroll-margin-top: var(--header-h);
     }
     .contact h2 {
@@ -728,7 +785,7 @@
       overflow-wrap: anywhere;
       transition: color var(--t) var(--ease), border-color var(--t) var(--ease);
     }
-    .contact__links a:hover { color: var(--haze); border-color: var(--haze); }
+    .contact__links a:hover { color: var(--accent); border-color: var(--accent); }
 
     .site-footer {
       display: flex;
@@ -737,7 +794,7 @@
       gap: .5rem 2rem;
       padding-block: 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
       border-top: 1px solid var(--rule);
-      color: var(--bone-50);
+      color: var(--muted);
       font-size: .72rem;
       letter-spacing: .06em;
     }
@@ -761,6 +818,7 @@
 
       .case__body { grid-template-columns: 1fr; }
       .meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .intro__grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 1000px) {
@@ -852,7 +910,7 @@
       <p class="locale" aria-live="off">
         <span class="locale__dot" aria-hidden="true"></span>
         <span>Bangalore</span>
-        <time id="clock" datetime="">--:--:--</time>
+        <time id="clock" datetime="">--:--</time>
         <span class="label" style="letter-spacing:.08em">IST</span>
       </p>
 
@@ -866,7 +924,7 @@
     </div>
   </header>
 
-  <a class="talk" href="#contact">
+  <a class="talk" href="mailto:rahulbro113@gmail.com?subject=Saw%20your%20portfolio">
     <span class="talk__dot" aria-hidden="true"></span>
     <span>Let's talk</span>
   </a>
@@ -879,6 +937,23 @@
     <section class="hero wrap" aria-label="Introduction">
       <div class="hero__scene" id="hero-scene" aria-hidden="true"><canvas id="hero-canvas"></canvas></div>
       <h1 class="display"><span class="hero__w" style="--i:0"><span>I</span></span> <span class="hero__w" style="--i:1"><span>own</span></span> <span class="hero__w" style="--i:2"><span>what</span></span> <span class="hero__w" style="--i:3"><span>happens</span></span> <span class="hero__w" style="--i:4"><span><em>after</em></span></span> <span class="hero__w" style="--i:5"><span>the</span></span> <span class="hero__w" style="--i:6"><span>signature.</span></span></h1>
+    </section>
+
+    <!-- ============================================================
+         Intro: portrait and what the job is
+         ============================================================ -->
+    <section class="intro reveal" aria-labelledby="intro-title">
+      <div class="intro__grid wrap">
+        <img class="intro__img" src="/assets/rahul.jpg" alt="Rahul Yadav" width="280" height="280" loading="lazy" decoding="async">
+        <div>
+          <h2 class="display" id="intro-title">What I actually think the job is</h2>
+          <div class="intro__prose">
+            <p>A product manager owns what the product does. I own whether it does it for the person who bought it.</p>
+            <p>That is genuinely how I read this role. Onboarding is not paperwork and customer success is not a satisfaction score. It is product management pointed at one relationship: what the customer thought they were buying, what they actually need, and the distance between the two. Somebody has to own that distance. Usually nobody is assigned to it.</p>
+            <p>Three years doing it across support, onboarding and adoption. The part I like is the part nobody schedules. The escalation that lands at four in the afternoon. The stakeholder who needs a technical answer in plain English. The question that keeps coming back until someone finally builds something so it stops coming back.</p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ============================================================
@@ -911,39 +986,25 @@
     <section class="work reveal" id="work" aria-labelledby="work-title" style="scroll-margin-top: var(--header-h)">
       <div class="section-head wrap">
         <h2 class="display" id="work-title">Work</h2>
-        <span class="label">Four ways the same job shows up</span>
+        <span class="label">Five ways the same job shows up</span>
       </div>
 
       <div class="work__list wrap">
         <a class="row" href="#case-1">
           <div class="row__main">
-            <span class="row__title display">The first ninety days of a customer relationship</span>
+            <span class="row__title display">Learning the job across a dozen industries at once</span>
             <span class="tags">
-              <span class="chip">Onboarding</span>
-              <span class="chip">Discovery</span>
-              <span class="chip">Time to value</span>
+              <span class="chip">Cross-industry</span>
+              <span class="chip">Stakeholders</span>
+              <span class="chip">Technical support</span>
             </span>
-            <span class="row__summary">A signed contract and a working customer are not the same thing.</span>
+            <span class="row__summary">My first support role, and the portfolio was every industry at once.</span>
             <span class="row__arrow" aria-hidden="true">→</span>
           </div>
-          <span class="row__detail"><span>Vimeo, Curriculum Associates · 2024 to now · Post-sale owner · Salesforce, Gainsight</span></span>
+          <span class="row__detail"><span>Advanced UK · 2023 to 2024 · Support Analyst, Enterprise Client Support · Zendesk, ServiceNow</span></span>
         </a>
 
         <a class="row" href="#case-2">
-          <div class="row__main">
-            <span class="row__title display">Reading an account before it goes quiet</span>
-            <span class="tags">
-              <span class="chip">Account health</span>
-              <span class="chip">Risk</span>
-              <span class="chip">Recovery</span>
-            </span>
-            <span class="row__summary">The accounts that leave rarely announce it first.</span>
-            <span class="row__arrow" aria-hidden="true">→</span>
-          </div>
-          <span class="row__detail"><span>Vimeo · 2024 to 2025 · Enterprise and mid-market portfolio · Salesforce, Gainsight</span></span>
-        </a>
-
-        <a class="row" href="#case-3">
           <div class="row__main">
             <span class="row__title display">Making expertise scale past one person</span>
             <span class="tags">
@@ -957,7 +1018,35 @@
           <span class="row__detail"><span>Vimeo, Curriculum Associates · 2024 to now · Built independently · AI tooling, internal automation</span></span>
         </a>
 
+        <a class="row" href="#case-3">
+          <div class="row__main">
+            <span class="row__title display">The first ninety days of a customer relationship</span>
+            <span class="tags">
+              <span class="chip">Onboarding</span>
+              <span class="chip">Discovery</span>
+              <span class="chip">Time to value</span>
+            </span>
+            <span class="row__summary">A signed contract and a working customer are not the same thing.</span>
+            <span class="row__arrow" aria-hidden="true">→</span>
+          </div>
+          <span class="row__detail"><span>Vimeo, Curriculum Associates · 2024 to now · Post-sale owner · Salesforce, Gainsight</span></span>
+        </a>
+
         <a class="row" href="#case-4">
+          <div class="row__main">
+            <span class="row__title display">Reading an account before it goes quiet</span>
+            <span class="tags">
+              <span class="chip">Account health</span>
+              <span class="chip">Risk</span>
+              <span class="chip">Recovery</span>
+            </span>
+            <span class="row__summary">The accounts that leave rarely announce it first.</span>
+            <span class="row__arrow" aria-hidden="true">→</span>
+          </div>
+          <span class="row__detail"><span>Vimeo · 2024 to 2025 · Enterprise and mid-market portfolio · Salesforce, Gainsight</span></span>
+        </a>
+
+        <a class="row" href="#case-5">
           <div class="row__main">
             <span class="row__title display">The relationship layer</span>
             <span class="tags">
@@ -976,51 +1065,35 @@
     <!-- ============================================================
          Case studies
          ============================================================ -->
-    <section aria-label="Case studies" style="margin-top: clamp(3rem, 8vw, 7rem)">
+    <section aria-label="Case studies">
 
       <article class="case wrap reveal" id="case-1" aria-labelledby="case-1-title">
         <span class="case__num label">Case 01</span>
-        <h2 class="case__title display" id="case-1-title">The first ninety days of a customer relationship</h2>
+        <h2 class="case__title display" id="case-1-title">Learning the job across a dozen industries at once</h2>
         <div class="tags case__tags">
-          <span class="chip">Onboarding</span>
-          <span class="chip">Discovery</span>
-          <span class="chip">Time to value</span>
+          <span class="chip">Cross-industry</span>
+          <span class="chip">Stakeholders</span>
+          <span class="chip">Technical support</span>
         </div>
         <dl class="meta">
-          <div><dt class="label">Company</dt><dd>Vimeo, Curriculum Associates</dd></div>
-          <div><dt class="label">Years</dt><dd>2024 to now</dd></div>
-          <div><dt class="label">Role</dt><dd>Post-sale owner</dd></div>
-          <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
+          <div><dt class="label">Company</dt><dd>Advanced UK</dd></div>
+          <div><dt class="label">Years</dt><dd>2023 to 2024</dd></div>
+          <div><dt class="label">Role</dt><dd>Support Analyst, Enterprise Client Support</dd></div>
+          <div><dt class="label">Tools</dt><dd>Zendesk, ServiceNow</dd></div>
         </dl>
         <div class="case__body">
-          <p class="case__lede">A signed contract and a working customer are not the same thing.</p>
-          <p class="case__prose">The gap between a signature and real usage is where most enterprise relationships quietly fail. I own the post-sale welcome: the first conversation, the discovery that finds out what this customer is actually trying to do, and the onboarding path that takes them from initial setup to the point where the product is earning its keep. Structured, not improvised, because a customer who is guessing at their own rollout is a customer who churns at renewal.</p>
+          <p class="case__lede">My first support role, and the portfolio was every industry at once.</p>
+          <div class="case__prose">
+            <p>This was where I learned the job. The client portfolio ran across industries, which meant no two accounts had the same setup, the same vocabulary, or the same idea of what "working" looked like. You cannot lean on pattern-matching in that situation. You have to actually ask what a client is trying to do, because the thing they requested and the thing they need are often two different things.</p>
+            <p>It also meant talking to a system administrator and a senior leader in the same week about the same problem, and understanding that those are two different conversations. The habit I took out of it was getting fluent in unfamiliar enterprise software fast, because there was never a week where that wasn't required.</p>
+            <p>By the time I left I could take a problem I had never seen before, reproduce it from the customer's side, and work out what it would actually cost them if it sat unresolved for another week. That last part is what changed how I worked. It turned a ticket from a queue item into a decision about urgency, and it is the habit I have carried into every role since.</p>
+          </div>
         </div>
       </article>
 
       <article class="case wrap reveal" id="case-2" aria-labelledby="case-2-title">
         <span class="case__num label">Case 02</span>
-        <h2 class="case__title display" id="case-2-title">Reading an account before it goes quiet</h2>
-        <div class="tags case__tags">
-          <span class="chip">Account health</span>
-          <span class="chip">Risk</span>
-          <span class="chip">Recovery</span>
-        </div>
-        <dl class="meta">
-          <div><dt class="label">Company</dt><dd>Vimeo</dd></div>
-          <div><dt class="label">Years</dt><dd>2024 to 2025</dd></div>
-          <div><dt class="label">Role</dt><dd>Enterprise and mid-market portfolio</dd></div>
-          <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
-        </dl>
-        <div class="case__body">
-          <p class="case__lede">The accounts that leave rarely announce it first.</p>
-          <p class="case__prose">I carried a portfolio of enterprise and mid-market accounts and watched them for the signals that come before a renewal conversation goes badly. When a major enterprise retail account started drifting toward churn, the answer was not another check-in call. It was a specific set of recommendations built around how they had actually configured things and what they were trying to get out of it. The account stayed.</p>
-        </div>
-      </article>
-
-      <article class="case wrap reveal" id="case-3" aria-labelledby="case-3-title">
-        <span class="case__num label">Case 03</span>
-        <h2 class="case__title display" id="case-3-title">Making expertise scale past one person</h2>
+        <h2 class="case__title display" id="case-2-title">Making expertise scale past one person</h2>
         <div class="tags case__tags">
           <span class="chip">Knowledge systems</span>
           <span class="chip">AI tooling</span>
@@ -1034,13 +1107,61 @@
         </dl>
         <div class="case__body">
           <p class="case__lede">Answering the same question twice is a system problem.</p>
-          <p class="case__prose">Every support organisation has a set of questions it answers over and over, and every one of those is time not spent on the accounts that need judgment. I built the self-service knowledge base so the next customer did not need me for what the last one had asked. On my own initiative I built an AI-powered chatbot and an internal automation tool, both aimed at the same thing: putting what I know somewhere it can be used without me in the room. I also mentored a group of new hires through their first two months, which is the same problem solved with people instead of software.</p>
+          <div class="case__prose">
+            <p>Every support organisation has a set of questions it answers over and over, and every one of those is time not spent on the accounts that need judgment. I built the self-service knowledge base so the next customer did not need me for what the last one had asked. On my own initiative I built an AI-powered chatbot and an internal automation tool, both aimed at the same thing: putting what I know somewhere it can be used without me in the room. I also mentored a group of new hires through their first two months, which is the same problem solved with people instead of software.</p>
+            <p>What changed was the shape of the queue. The tool read the history of our agent conversations and the knowledge base, learned how the team actually phrased things, and worked out which questions kept coming back. It answered those directly, routed the rest to the right team, and raised a ticket automatically when something needed a person. Co-built with our product and engineering teams, it handled over 800 queries and brought ticket volume down by 14%. Specialists stopped spending their day on questions that had already been answered somewhere and moved onto the issues that genuinely needed troubleshooting.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="case wrap reveal" id="case-3" aria-labelledby="case-3-title">
+        <span class="case__num label">Case 03</span>
+        <h2 class="case__title display" id="case-3-title">The first ninety days of a customer relationship</h2>
+        <div class="tags case__tags">
+          <span class="chip">Onboarding</span>
+          <span class="chip">Discovery</span>
+          <span class="chip">Time to value</span>
+        </div>
+        <dl class="meta">
+          <div><dt class="label">Company</dt><dd>Vimeo, Curriculum Associates</dd></div>
+          <div><dt class="label">Years</dt><dd>2024 to now</dd></div>
+          <div><dt class="label">Role</dt><dd>Post-sale owner</dd></div>
+          <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
+        </dl>
+        <div class="case__body">
+          <p class="case__lede">A signed contract and a working customer are not the same thing.</p>
+          <div class="case__prose">
+            <p>The gap between a signature and real usage is where most enterprise relationships quietly fail. I own the post-sale welcome: the first conversation, the discovery that finds out what this customer is actually trying to do, and the onboarding path that takes them from initial setup to the point where the product is earning its keep. Structured, not improvised, because a customer who is guessing at their own rollout is a customer who churns at renewal.</p>
+            <p>That account renewed. The AM team did the work on the commercial side, but the reason the conversation was straightforward is that there was nothing in it to be surprised by: expectations had been set during onboarding and the customer already knew what the product was doing for them. Their ticket volume came down as well, which is the clearer signal. A customer who has stopped asking basic questions is a customer whose rollout actually worked.</p>
+          </div>
         </div>
       </article>
 
       <article class="case wrap reveal" id="case-4" aria-labelledby="case-4-title">
         <span class="case__num label">Case 04</span>
-        <h2 class="case__title display" id="case-4-title">The relationship layer</h2>
+        <h2 class="case__title display" id="case-4-title">Reading an account before it goes quiet</h2>
+        <div class="tags case__tags">
+          <span class="chip">Account health</span>
+          <span class="chip">Risk</span>
+          <span class="chip">Recovery</span>
+        </div>
+        <dl class="meta">
+          <div><dt class="label">Company</dt><dd>Vimeo</dd></div>
+          <div><dt class="label">Years</dt><dd>2024 to 2025</dd></div>
+          <div><dt class="label">Role</dt><dd>Enterprise and mid-market portfolio</dd></div>
+          <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
+        </dl>
+        <div class="case__body">
+          <p class="case__lede">The accounts that leave rarely announce it first.</p>
+          <div class="case__prose">
+            <p>I carried a portfolio of enterprise and mid-market accounts and watched them for the signals that come before a renewal conversation goes badly. When a major enterprise retail account started drifting toward churn, the answer was not another check-in call. It was a specific set of recommendations built around how they had actually configured things and what they were trying to get out of it. The account stayed.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="case wrap reveal" id="case-5" aria-labelledby="case-5-title">
+        <span class="case__num label">Case 05</span>
+        <h2 class="case__title display" id="case-5-title">The relationship layer</h2>
         <div class="tags case__tags">
           <span class="chip">Stakeholders</span>
           <span class="chip">Escalation</span>
@@ -1054,7 +1175,10 @@
         </dl>
         <div class="case__body">
           <p class="case__lede">When something breaks, the second thing at risk is confidence.</p>
-          <p class="case__prose">I work with everyone from system administrators to senior leadership, and the same escalation needs to sound different to each of them. What holds it together is being predictable rather than impressive: acknowledge fast so nobody fills the silence with worst cases, make one clear call rather than hedging across three, and debrief the same day in outcomes rather than vocabulary nobody outside the team uses. Trust is built in how you behave on the bad days, not the good ones.</p>
+          <div class="case__prose">
+            <p>I work with everyone from system administrators to senior leadership, and the same escalation needs to sound different to each of them. What holds it together is being predictable rather than impressive: acknowledge fast so nobody fills the silence with worst cases, make one clear call rather than hedging across three, and debrief the same day in outcomes rather than vocabulary nobody outside the team uses. Trust is built in how you behave on the bad days, not the good ones.</p>
+            <p>The honest version is that I could not always fix it in the moment. What I could do was refuse to guess. I would reproduce the problem in a test environment, confirm the fix actually held, and if it turned out to be a configuration or product issue, document it properly and hand it to engineering rather than leaving the customer to chase it. People forgive a slower answer. They do not forgive a confident wrong one.</p>
+          </div>
         </div>
       </article>
 
@@ -1066,7 +1190,11 @@
     <section class="about reveal" id="about" aria-labelledby="about-title">
       <div class="wrap">
         <span class="label" id="about-title">About</span>
-        <p class="about__statement display">Solving a problem once proves you can. Making sure it stops arriving is <em>the actual job.</em> That is why I build the documentation, the knowledge base and the tooling before anyone asks for it.</p>
+        <p class="about__statement display">I sit at the intersection of technical support and customer success, and the part I care about is being the person enterprise clients actually trust to get something done.</p>
+        <div class="about__prose">
+          <p>That covers owning a critical escalation end to end, building automation that takes work off the queue, and walking a non-technical stakeholder through a complex problem in language that does not require them to be technical. The mindset is the same every time: the client's problem is my problem until it is solved.</p>
+          <p>The experience spans the full enterprise lifecycle, from pre-sales demos and onboarding through to adoption, account health, and renewal support, across portfolios in several industries. Enterprise accounts kept from churning, CSAT held above 95%, and a chatbot that took real volume off the queue.</p>
+        </div>
 
         <div class="facts">
           <div>
@@ -1082,6 +1210,8 @@
             <ul>
               <li><span>Salesforce</span></li>
               <li><span>Gainsight</span></li>
+              <li><span>Zendesk</span></li>
+              <li><span>ServiceNow</span></li>
               <li><span>Excel</span></li>
               <li><span>AI tooling</span></li>
             </ul>
@@ -1109,8 +1239,8 @@
       <h2 class="display" id="contact-title" style="margin-top:1.25rem">Currently in Bangalore. Say hi.</h2>
       <div class="contact__links">
         <a href="mailto:rahulbro113@gmail.com">rahulbro113@gmail.com</a>
-        <!-- TODO: replace href with your LinkedIn profile URL -->
-        <a href="#" rel="me noopener" data-linkedin>LinkedIn</a>
+        
+        <a href="https://www.linkedin.com/in/yadav-rahul-a-674806158" rel="me noopener" target="_blank">LinkedIn</a>
       </div>
     </section>
 
@@ -1311,7 +1441,8 @@
         }
         function range(a, b) { return a + (b - a) * rand(); }
 
-        var HAZE = 0x8A93E0, GOLD = 0xE3B778;
+        // Ink for everything: on paper the pieces read as graphite line work.
+        var HAZE = 0x1B1A1C, GOLD = 0x1B1A1C;
         // Started at 15 and read as busy; halved so the headline stays the subject.
         var COUNT = 8;
         var group = new THREE.Group();
@@ -1331,7 +1462,7 @@
             roughness: 0.85,
             wireframe: wire,
             transparent: true,
-            opacity: isRing ? 0.7 : 0.6
+            opacity: wire ? 0.5 : (isRing ? 0.42 : 0.32)
           });
           var mesh = new THREE.Mesh(geometry, material);
           // Scattered in depth and biased to the right, away from the headline.
@@ -1603,7 +1734,7 @@
       var clock = document.getElementById('clock');
       var fmt = new Intl.DateTimeFormat('en-GB', {
         timeZone: 'Asia/Kolkata',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour: '2-digit', minute: '2-digit',
         hourCycle: 'h23'
       });
       var iso = new Intl.DateTimeFormat('en-CA', {
@@ -1620,7 +1751,7 @@
         clock.setAttribute('datetime', iso.format(now).replace(', ', 'T') + '+05:30');
       }
       tick();
-      setInterval(tick, 1000);
+      setInterval(tick, 30000); // hours and minutes only, so half a minute is plenty
 
       // Footer year.
       document.getElementById('year').textContent = String(new Date().getFullYear());
