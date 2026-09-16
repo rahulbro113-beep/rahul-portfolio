@@ -40,8 +40,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Loaded without blocking render, so the loader can paint and count
        while the font CSS is still in flight. The loader watches this link. -->
-  <link id="fonts-css" rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap"></noscript>
+  <link id="fonts-css" rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Karla:ital,wght@0,400;0,500;1,400&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Karla:ital,wght@0,400;0,500;1,400&display=swap"></noscript>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -61,6 +61,7 @@
 
       --display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
       --mono: "DM Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+      --body: "Karla", "Helvetica Neue", Arial, system-ui, sans-serif;
 
       --gutter: clamp(1rem, 4vw, 4rem);
       --header-h: 4rem;
@@ -89,16 +90,18 @@
       overflow-x: clip;
       background: var(--paper);
       color: var(--ink);
-      font-family: var(--mono);
-      font-size: clamp(.9rem, .85rem + .25vw, 1.02rem);
+      font-family: var(--body);
+      font-size: clamp(1rem, .9rem + .3vw, 1.05rem); /* ~1rem on phones, 1.05rem on desktop */
       font-weight: 400;
       line-height: 1.6;
+      letter-spacing: 0;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
 
     h1, h2, h3, p, ul, dl, dd { margin: 0; }
+    strong, b { font-weight: 500; }
     ul { padding: 0; list-style: none; }
     a { color: inherit; text-decoration: none; }
     img, svg { max-width: 100%; height: auto; display: block; }
@@ -304,10 +307,30 @@
       overflow: hidden;
       min-height: 100svh;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
       padding-top: calc(var(--header-h) + 2rem);
       padding-bottom: 4rem;
     }
+    /* Availability line directly under the headline. */
+    .hero__avail {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-top: clamp(1.25rem, 3vw, 2rem);
+      max-width: 52%;
+      font-family: var(--mono);
+      font-size: .78rem;
+      letter-spacing: .02em;
+      color: var(--muted);
+    }
+    .hero__avail .locale__dot { background: var(--accent); }
+    html.loading .hero__avail { opacity: 0; }
+    html.revealed .hero__avail { animation: hero-in 900ms var(--ease) both; animation-delay: 720ms; }
+    @media (max-width: 999px) { .hero__avail { max-width: none; } }
     /* 3D scene (or its static fallback glow) sits under the headline. */
     .hero__scene {
       position: absolute;
@@ -465,7 +488,7 @@
     }
     .intro__prose {
       margin-top: 1.5rem;
-      max-width: 62ch;
+      max-width: 60ch;
       color: var(--muted);
       line-height: 1.75;
     }
@@ -733,7 +756,7 @@
       }
     }
     .case__prose {
-      max-width: 62ch;
+      max-width: 60ch;
       color: var(--muted);
       line-height: 1.75;
     }
@@ -761,7 +784,7 @@
     }
     .about__prose {
       margin-top: 2rem;
-      max-width: 62ch;
+      max-width: 60ch;
       color: var(--muted);
       line-height: 1.75;
     }
@@ -1003,6 +1026,17 @@
     }
 
     /* ------------------------------------------------------------------
+       Type roles. Body copy is Karla; the mono is reserved for the clock,
+       nav, chips, metadata, eyebrow labels, form labels and pill buttons.
+       Placed after the components so it also wins over `font: inherit`.
+       ------------------------------------------------------------------ */
+    .label, .chip, .nav a, .locale, .sound, .meta, .row__detail, .wall__meta,
+    .field label, .field legend, .talk, .btn-pill, .modal__copy, .hero__avail,
+    .loader__count {
+      font-family: var(--mono);
+    }
+
+    /* ------------------------------------------------------------------
        Responsive
        ------------------------------------------------------------------ */
     @media (max-width: 900px) {
@@ -1189,6 +1223,7 @@
     <section class="hero wrap" aria-label="Introduction">
       <div class="hero__scene" id="hero-scene" aria-hidden="true"><canvas id="hero-canvas"></canvas></div>
       <h1 class="display"><span class="hero__w" style="--i:0"><span>I</span></span> <span class="hero__w" style="--i:1"><span>own</span></span> <span class="hero__w" style="--i:2"><span>what</span></span> <span class="hero__w" style="--i:3"><span>happens</span></span> <span class="hero__w" style="--i:4"><span><em>after</em></span></span> <span class="hero__w" style="--i:5"><span>the</span></span> <span class="hero__w" style="--i:6"><span>signature.</span></span></h1>
+      <p class="hero__avail"><span class="locale__dot" aria-hidden="true"></span><span>Open to conversations about customer success, onboarding and technical account management.</span></p>
     </section>
 
     <!-- ============================================================
@@ -1577,7 +1612,7 @@
           sheetSeen = true;
           recompute();
           if (!(document.fonts && document.fonts.load)) { fontsSettled(); return; }
-          var faces = ['300 1em "DM Mono"', '400 1em "DM Mono"', '1em "Instrument Serif"', 'italic 1em "Instrument Serif"'];
+          var faces = ['300 1em "DM Mono"', '400 1em "DM Mono"', '400 1em "Karla"', '1em "Instrument Serif"', 'italic 1em "Instrument Serif"'];
           var loads = faces.map(function (f) { return document.fonts.load(f).then(null, function () {}); });
           loads[0].then(showDigits, showDigits);
           Promise.all(loads)
