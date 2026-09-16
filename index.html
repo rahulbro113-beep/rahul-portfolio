@@ -370,12 +370,14 @@
         max-width: 52%;
         font-size: clamp(3rem, 9vw, 10rem);
       }
+      /* A small signature object in the lower right: a box that starts well
+         past the headline's 52% column and stops above the Let's talk pill. */
       .hero__scene {
         inset: auto;
-        top: calc(var(--header-h) + 1rem);
         right: var(--gutter);
-        bottom: 0;
-        width: calc((100% - 2 * var(--gutter)) * .40);
+        bottom: 7.5rem;
+        width: calc((100% - 2 * var(--gutter)) * .34);
+        height: min(52%, 30rem);
       }
     }
     .hero h1 em {
@@ -467,18 +469,18 @@
     }
     .intro__grid {
       display: grid;
-      grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
       gap: 2rem clamp(2rem, 6vw, 6rem);
       align-items: start;
     }
     .intro__img {
       display: block;
       width: 100%;
-      max-width: 280px;
+      max-width: 260px;
       aspect-ratio: 1;
       object-fit: cover;
       border: 1px solid var(--rule);
-      border-radius: 0;
+      border-radius: 50%; /* the square source keeps the face centred */
       box-shadow: none;
       background: var(--paper);
     }
@@ -1232,7 +1234,7 @@
          ============================================================ -->
     <section class="intro reveal" aria-labelledby="intro-title">
       <div class="intro__grid wrap">
-        <img class="intro__img" src="/assets/rahul.jpg" alt="Rahul Yadav" width="280" height="280" loading="lazy" decoding="async">
+        <img class="intro__img" src="/assets/rahul.jpg" alt="Rahul Yadav" width="260" height="260" loading="lazy" decoding="async">
         <div>
           <h2 class="display" id="intro-title">What I actually think the job is</h2>
           <div class="intro__prose">
@@ -1834,6 +1836,16 @@
         cyl(0.2, 0.18, 0.34, 10, mugMat, 2.35, 2.3, 0.1, rig);              // mug
         var mugH = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.028, 6, 12), mugMat);
         mugH.position.set(2.56, 2.3, 0.1); mugH.rotation.y = Math.PI / 2; mugH.castShadow = true; rig.add(mugH);
+        // Steam: three faint paper-coloured planes that drift up from the rim and reset.
+        var steamMat = new THREE.MeshBasicMaterial({ color: 0xF1EFE9, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide });
+        var steam = [];
+        for (var st = 0; st < 3; st++) {
+          var wisp = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.2), steamMat.clone());
+          wisp.position.set(2.35, 2.5, 0.1);
+          rig.add(wisp);
+          steam.push(wisp);
+        }
+        var MUG_RIM = 2.47;
         var paperMat = M(PAPERS, 0.95);
         for (var i = 0; i < 4; i++) { box(0.85, 0.02, 0.6, paperMat, -1.75 + i * 0.012, 2.15 + i * 0.022, 0.75, rig); }
 
@@ -1873,10 +1885,12 @@
         box(0.54, 0.22, 0.52, hair, 0, 3.1, 0.02, person);                  // hair top
         box(0.54, 0.3, 0.12, hair, 0, 2.95, 0.22, person);                  // hair back
         box(0.16, 0.3, 0.16, skin, 0, 2.58, 0.04, person);                  // neck
+        var forearms = [], hands = []; // kept for the typing loop
         [-1, 1].forEach(function (s) {
           var up = box(0.24, 0.6, 0.24, shirt, s * 0.54, 2.14, 0.02, person); up.rotation.x = -0.3;
           var fore = box(0.21, 0.56, 0.21, skin, s * 0.52, 1.95, -0.3, person); fore.rotation.x = -1.32;
-          box(0.22, 0.09, 0.28, skin, s * 0.5, 1.8, -0.6, person);           // hand
+          var hand = box(0.22, 0.09, 0.28, skin, s * 0.5, 1.8, -0.6, person);
+          forearms.push(fore); hands.push(hand);
         });
         [-1, 1].forEach(function (s) {
           box(0.34, 0.3, 1.0, jeans, s * 0.28, 1.48, -0.34, person);
@@ -1886,8 +1900,11 @@
 
         // Scroll-driven zoom: t = 0 far and small while the headline is fully
         // visible, t = 1 at the closest point once the hero has scrolled out.
-        var FAR = { pos: new THREE.Vector3(13.5, 6.6, 9.0), look: new THREE.Vector3(0.2, 2.3, 0.4), fov: 32 };
-        var NEAR = { pos: new THREE.Vector3(8.6, 5.0, 5.9), look: new THREE.Vector3(0.3, 2.45, 0.5), fov: 30 };
+        // Camera sits about twice as far back as the standalone scene, so the
+        // desk renders at roughly half the size with natural perspective, and the
+        // scroll zoom closes only a little of that distance.
+        var FAR = { pos: new THREE.Vector3(25.6, 12.5, 17.1), look: new THREE.Vector3(0.2, 2.1, 0.4), fov: 32 };
+        var NEAR = { pos: new THREE.Vector3(22.0, 10.9, 14.7), look: new THREE.Vector3(0.25, 2.15, 0.45), fov: 31 };
         var tmpP = new THREE.Vector3(), tmpL = new THREE.Vector3();
         function setZoom(t) {
           var e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -1910,9 +1927,6 @@
           renderer.setPixelRatio(pixelRatio());
           renderer.setSize(w, h, false);
           camera.aspect = w / h;
-          // The box is portrait, so the whole desk is scaled down to fit its width;
-          // shrinking around the floor lets it sit lower in the hero.
-          rig.scale.setScalar(Math.min(1, Math.max(0.55, camera.aspect * 1.05)));
           setZoom(current);
         }
         var target = 0, current = 0;
@@ -1924,18 +1938,40 @@
         renderer.compile(scene, camera);
         renderer.render(scene, camera);
 
-        var running = false, rafId = 0, dead = false;
-        function frame() {
+        var running = false, rafId = 0, dead = false, last = 0, clock = 0;
+        var TYPE_ROT = 0.04, TYPE_LIFT = 0.012, TYPE_HZ = 2.5; // barely perceptible; halve if it reads as a wave
+        var handBaseY = hands[0].position.y, foreBaseX = forearms[0].rotation.x;
+        function frame(now) {
           if (!running) { return; }
+          var dt = last ? Math.min((now - last) / 1000, 0.05) : 0.016;
+          last = now;
+          clock += dt;
           target = heroProgress();
           current += (target - current) * 0.08;
           setZoom(current);
+
+          // Typing: the two sides run out of phase.
+          var omega = clock * Math.PI * 2 * TYPE_HZ;
+          for (var i = 0; i < 2; i++) {
+            var ph = i === 0 ? 0 : Math.PI;
+            forearms[i].rotation.x = foreBaseX + Math.sin(omega + ph) * TYPE_ROT;
+            hands[i].position.y = handBaseY + Math.sin(omega + ph) * TYPE_LIFT;
+          }
+          // Steam: each wisp rises about half a unit while fading, then resets at the rim.
+          for (var k = 0; k < steam.length; k++) {
+            var u = (clock * 0.28 + k / 3) % 1;
+            steam[k].position.y = MUG_RIM + u * 0.5;
+            steam[k].position.x = 2.35 + Math.sin((clock + k) * 1.3) * 0.03;
+            steam[k].material.opacity = 0.12 * (1 - u);
+            steam[k].quaternion.copy(camera.quaternion); // face the camera
+          }
+
           renderer.render(scene, camera);
           rafId = window.requestAnimationFrame(frame);
         }
         function start() {
           if (dead || running || root.classList.contains('loading')) { return; }
-          running = true; rafId = window.requestAnimationFrame(frame);
+          running = true; last = 0; rafId = window.requestAnimationFrame(frame);
         }
         function stop() { running = false; window.cancelAnimationFrame(rafId); }
 
