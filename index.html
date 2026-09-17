@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Rahul — Customer onboarding, adoption, enterprise relationships</title>
+  <title>Yadav Rahul — Customer onboarding, adoption, enterprise relationships</title>
   <meta name="description" content="Rahul owns what happens after the signature: customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
   <meta name="theme-color" content="#241F22">
 
   <!-- Social cards -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Rahul">
-  <meta property="og:title" content="Rahul — I own what happens after the signature.">
+  <meta property="og:site_name" content="Yadav Rahul">
+  <meta property="og:title" content="Yadav Rahul — I own what happens after the signature.">
   <meta property="og:description" content="Customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
   <meta property="og:url" content="https://rahul-portfolio-one-beta.vercel.app/">
   <meta property="og:image" content="https://rahul-portfolio-one-beta.vercel.app/og.png">
@@ -18,7 +18,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="I own what happens after the signature. Rahul, customer onboarding, adoption and enterprise relationships.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Rahul — I own what happens after the signature.">
+  <meta name="twitter:title" content="Yadav Rahul — I own what happens after the signature.">
   <meta name="twitter:description" content="Customer onboarding, adoption and enterprise relationships. Currently in Bangalore.">
   <meta name="twitter:image" content="https://rahul-portfolio-one-beta.vercel.app/og.png">
 
@@ -795,24 +795,48 @@
     .about ::selection { background: var(--paper); color: var(--band); }
     .facts {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(4, minmax(0, 1fr)); /* desktop; 2 on tablet, 1 on phones */
+      gap: 2.5rem 2rem;
       margin-top: clamp(2.5rem, 5vw, 4rem);
       padding-top: 1.5rem;
       border-top: 1px solid var(--rule);
     }
+    .facts > div { min-width: 0; }
     .facts h3 { margin-bottom: 1rem; }
+    .facts h4 { margin: 1.25rem 0 .5rem; }
     .facts li {
-      padding-block: .45rem;
+      padding-block: .5rem;
       border-bottom: 1px solid var(--rule);
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
       overflow-wrap: anywhere;
     }
     .facts li:last-child { border-bottom: 0; }
-    .facts li span:last-child { color: var(--muted); font-size: .85em; white-space: nowrap; }
+    .facts__meta {
+      display: block;
+      color: var(--muted);
+      font-size: .9em;
+    }
+    .facts p {
+      color: var(--muted);
+      font-size: .95em;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+    .facts p + p { margin-top: .6rem; }
+    .facts a {
+      color: var(--paper);
+      border-bottom: 1px solid var(--rule);
+      transition: border-color var(--t) var(--ease);
+    }
+    .facts a:hover { border-color: var(--paper); }
+    .about__lines {
+      margin-top: clamp(2rem, 4vw, 3rem);
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+      max-width: 60ch;
+    }
+    .about__lines p + p { margin-top: .35rem; color: var(--muted); }
+    @media (max-width: 1000px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 600px) { .facts { grid-template-columns: 1fr; gap: 2rem; } }
 
     /* ------------------------------------------------------------------
        Contact
@@ -1092,7 +1116,6 @@
       .section-head { grid-template-columns: 1fr; gap: .75rem; }
       .section-head .label { padding-bottom: 0; }
 
-      .facts { grid-template-columns: 1fr; gap: 2.5rem; }
       .talk { right: 1rem; padding: .7rem 1rem; font-size: .72rem; }
     }
 
@@ -1108,7 +1131,6 @@
       .meta { grid-template-columns: 1fr; gap: 1rem; }
       .hero h1 { font-size: clamp(2.75rem, 16vw, 4.75rem); max-width: none; }
       .wall__item { font-size: clamp(1.75rem, 9.6vw, 3rem); }
-      .facts li span:last-child { white-space: normal; }
     }
 
     /* ------------------------------------------------------------------
@@ -1142,8 +1164,8 @@
        ============================================================ -->
   <header class="site-header">
     <div class="site-header__inner wrap">
-      <a class="brand" href="#top" aria-label="Rahul, back to top">
-        <span class="brand__name">Rahul</span>
+      <a class="brand" href="#top" aria-label="Yadav Rahul, back to top">
+        <span class="brand__name">Yadav Rahul</span>
         <span class="brand__role">Customer onboarding · Adoption · Enterprise relationships</span>
       </a>
 
@@ -1257,7 +1279,7 @@
       <ul class="wall__list wrap" data-wall>
         <li class="wall__item display" data-wall-item>
           <span class="wall__name">Curriculum Associates</span>
-          <span class="wall__meta">Technical Support Specialist, 2025 to now</span>
+          <span class="wall__meta">Enterprise Technical Support Specialist, 2025 to now</span>
         </li>
         <li class="wall__item display" data-wall-item>
           <span class="wall__name">Vimeo</span>
@@ -1319,7 +1341,7 @@
             <span class="row__summary">The demo is a promise. Onboarding is whether you keep it.</span>
             <span class="row__arrow" aria-hidden="true">→</span>
           </div>
-          <span class="row__detail"><span>Curriculum Associates · 2025 to now · Technical Support Specialist, Enterprise Accounts · Salesforce, Gainsight</span></span>
+          <span class="row__detail"><span>Curriculum Associates · 2025 to now · Enterprise Technical Support Specialist · Salesforce, Gainsight</span></span>
         </a>
 
         <a class="row" href="#case-4">
@@ -1430,7 +1452,7 @@
         <dl class="meta">
           <div><dt class="label">Company</dt><dd>Curriculum Associates</dd></div>
           <div><dt class="label">Years</dt><dd>2025 to now</dd></div>
-          <div><dt class="label">Role</dt><dd>Technical Support Specialist, Enterprise Accounts</dd></div>
+          <div><dt class="label">Role</dt><dd>Enterprise Technical Support Specialist, supporting enterprise clients and their users</dd></div>
           <div><dt class="label">Tools</dt><dd>Salesforce, Gainsight</dd></div>
         </dl>
         <div class="case__body">
@@ -1530,33 +1552,44 @@
           <div>
             <h3 class="label">Where I have worked</h3>
             <ul>
-              <li><span>Curriculum Associates</span><span>2025 to now</span></li>
-              <li><span>Vimeo</span><span>2024 to 2025</span></li>
-              <li><span>Advanced UK</span><span>2023 to 2024</span></li>
+              <li>Curriculum Associates<span class="facts__meta">Enterprise Technical Support Specialist, 2025 to now</span></li>
+              <li>Vimeo<span class="facts__meta">Customer Solutions Specialist, 2024 to 2025</span></li>
+              <li>Advanced UK<span class="facts__meta">Support Analyst, 2023 to 2024</span></li>
             </ul>
           </div>
           <div>
             <h3 class="label">Tools</h3>
             <ul>
-              <li><span>Salesforce</span></li>
-              <li><span>Gainsight</span></li>
-              <li><span>Zendesk</span></li>
-              <li><span>ServiceNow</span></li>
-              <li><span>Excel</span></li>
-              <li><span>AI tooling</span></li>
+              <li>Salesforce</li>
+              <li>Gainsight</li>
+              <li>Zendesk</li>
+              <li>ServiceNow</li>
+              <li>Excel</li>
+              <li>AI tooling</li>
             </ul>
           </div>
           <div>
-            <h3 class="label">Also</h3>
+            <h3 class="label">Education</h3>
+            <p>Bachelor of Computer Applications, specialising in Mobile Application and Cloud Technology. Jain (Deemed-to-be) University, School of Computer Science and IT, Bangalore. 2019 to 2022.</p>
+            <h4 class="label">Published</h4>
+            <p><a href="https://easychair.org/publications/preprint/TXkW/open" target="_blank" rel="noopener">Essential Smart Health Care Application for Post-Covid: Hospital Management System</a>. First author, with K Razan, Aseel Abdul Razack and Dr Mahesh V. EasyChair Preprint 7878, May 2022.</p>
+          </div>
+          <div>
+            <h3 class="label">Certifications</h3>
             <ul>
-              <li><span>Bangalore, India</span></li>
-              <li><span>English, Hindi, Kannada</span></li>
-              <li><span>BCA</span><span>Jain University</span></li>
-              <li><span>AI Fluency</span><span>Anthropic</span></li>
-              <li><span>Generative AI Fundamentals</span><span>Databricks</span></li>
-              <li><span>Inbound Sales</span><span>HubSpot</span></li>
+              <li>Communication with Executives, LinkedIn Learning</li>
+              <li>Generative AI Fundamentals, Databricks</li>
+              <li>AI Fluency: Framework and Foundations, Anthropic</li>
+              <li>Inbound Sales, HubSpot Academy</li>
+              <li>Becoming an AI-Native Product Manager, Pendo.io</li>
+              <li>Customer Experience for Business Success, HP LIFE</li>
             </ul>
           </div>
+        </div>
+
+        <div class="about__lines">
+          <p>Based in Bangalore, India.</p>
+          <p>English for work, Hindi and Kannada for everything else Bangalore asks of you.</p>
         </div>
       </div>
     </section>
@@ -1576,7 +1609,7 @@
   </main>
 
   <footer class="site-footer wrap">
-    <span>Rahul · Bangalore</span>
+    <span>Yadav Rahul Awadhnath · Bangalore</span>
     <span>&copy; <span id="year">2026</span></span>
   </footer>
 
